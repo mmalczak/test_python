@@ -8,10 +8,10 @@ context = zmq.Context()
 num_conn = 4
 
 task = "fft"
-args = [1]+[0]*31
+args = [1]+[0]*63
 #args = [1]
 #task = "empty_loop"
-#args = 100000000
+#args = 500000
 #task = "random_gen"
 #args = 10
 #task = "receive_array"
@@ -28,7 +28,10 @@ for i in range(0, num_conn):
 length = 1000
 f = 6
 t = np.array(range(0, length))/length
-sig = (np.sin(2 * np.pi * f * t - np.pi / 2) + 1) / 2 / 50
+#sig = (np.sin(2 * np.pi * f * t + np.pi / 2) + 1) / 2 / 50
+c = 10
+sig = [1/5 if (el%(length/f)<(length/(c*2*f))) else 0 for el in range(length)]
+
 #sig = np.ones(length)/10000
 
 time_diff=0
