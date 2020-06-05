@@ -29,7 +29,7 @@ class Client():
         self.control_socket = self.context.socket(zmq.DEALER)
         self.control_socket.connect("tcp://10.10.10.1:"+str(5540))
 
-    def start(self):
+    def start(self, num_task, delay_mod_freq, prob_l_freq):
         ### Energy measurement start ###
         control_message = pickle.dumps({'task':'energy_measure_start', 'args':None})
         self.control_socket.send(control_message)
@@ -37,21 +37,18 @@ class Client():
         ### Energy measurement start ###
 
 
-        num_tasks = 10
-        f = 6
         t = np.array(range(0, num_tasks))/num_tasks
 
         #delay modulation
-        dm_sig_sin = (np.sin(2 * np.pi * f * t + np.pi / 2) + 1) / 2 / 50
+        dm_sig_sin = (np.sin(2 * np.pi * delay_mod_freq * t + np.pi / 2) + 1) / 2 / 50
         c = 10
-        #dm_sig_square = [1/5 if (el%(num_tasks/f)<(num_tasks/(c*2*f))) else 0 for el in range(num_tasks)]
-        dm_sig_square = [0 if (el%(num_tasks/f)<((2*c-1)/c)*(num_tasks/(2*f))) else 1/5 for el in range(num_tasks)]
+        #dm_sig_square = [1/5 if (el%(num_tasks/delay_mod_freq)<(num_tasks/(c*2*delay_mod_freq))) else 0 for el in range(num_tasks)]
+        dm_sig_square = [0 if (el%(num_tasks/delay_mod_freq)<((2*c-1)/c)*(num_tasks/(2*delay_mod_freq))) else 1/5 for el in range(num_tasks)]
         
-        f = 3
         #problem length modulation
-        plm_sig_fft = (np.sin(2 * np.pi * f * t - np.pi / 2) + 1) / 2 * 512
-        plm_sig_empty_loop = (np.sin(2 * np.pi * f * t - np.pi / 2) + 1) / 2 * 50000
-        plm_sig_random_gen = (np.sin(2 * np.pi * f * t - np.pi / 2) + 1) / 2 * 500
+        plm_sig_fft = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 512
+        plm_sig_empty_loop = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 50000
+        plm_sig_random_gen = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 500
         
         #sig = np.ones(num_tasks)/10000
         
@@ -94,4 +91,8 @@ class Client():
         ### Energy measurement stop ###
 
 client = Client()
-client.start()
+
+num_tasks = 10
+delay_mod_freq = 6
+prob_l_mod_freq = 3
+client.start(num_tasks, delay_mod_freq, prob_l_mod_freq)
