@@ -35,7 +35,7 @@ c = 10
 #dm_sig_square = [1/5 if (el%(length/f)<(length/(c*2*f))) else 0 for el in range(length)]
 dm_sig_square = [0 if (el%(length/f)<((2*c-1)/c)*(length/(2*f))) else 1/5 for el in range(length)]
 
-f = 18
+f = 3
 #problem length modulation
 plm_sig_fft = (np.sin(2 * np.pi * f * t - np.pi / 2) + 1) / 2 * 512
 plm_sig_empty_loop = (np.sin(2 * np.pi * f * t - np.pi / 2) + 1) / 2 * 50000
@@ -56,13 +56,13 @@ for j in range(0, length):
         data = sockets[i].recv()
 #        print(data)
     #time.sleep(dm_sig_sin[j])
-    time.sleep(dm_sig_square[j])
-    #time.sleep(0.02)
+#    time.sleep(dm_sig_square[j])
+#    time.sleep(0.02)
 
-    #time_diff = time.time() - start
-    #sleep_time = sig[j] - time_diff
-    #if sleep_time > 0:
-    #    time.sleep(sleep_time)
+    time_diff = time.time() - start
+    sleep_time = dm_sig_square[j] - time_diff
+    if sleep_time > 0:
+        time.sleep(sleep_time)
 #    print("sig")
 #    print(sig[j])
 #    print("time")
