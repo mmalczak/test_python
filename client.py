@@ -2,6 +2,7 @@ import zmq
 import pickle
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 
 class Client():
 
@@ -88,8 +89,15 @@ client = Client(task)
 num_tasks = 10
 delay_mod_freq = 6
 prob_l_mod_freq = 3
-ret = client.start(num_tasks, delay_mod_freq, prob_l_mod_freq)
-print("Energy = {}".format(ret['energy']))
-print("Total time = {}".format(ret['time']))
 
+energy_list = []
+time_list = []
+for i in range(100):
+    ret = client.start(num_tasks, delay_mod_freq, prob_l_mod_freq)
+    #print("Energy = {}".format(ret['energy']))
+    #print("Total time = {}".format(ret['time']))
+    energy_list.append(ret['energy'])
+    time_list.append(ret['time'])
 
+plt.scatter(energy_list, time_list)
+plt.show()
