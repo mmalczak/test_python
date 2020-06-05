@@ -75,10 +75,7 @@ class Client():
         energy = self.control_socket.recv()
         energy = float(energy)
         ### Energy measurement stop ###
-
-        print("Energy = {}".format(energy))
-        print("Total time = {}".format(total_time))
-
+        return {'energy':energy, 'time':total_time}
 
 # Available tasks with example arguments
 # "fft" [1]+[0]*31
@@ -91,4 +88,8 @@ client = Client(task)
 num_tasks = 10
 delay_mod_freq = 6
 prob_l_mod_freq = 3
-client.start(num_tasks, delay_mod_freq, prob_l_mod_freq)
+ret = client.start(num_tasks, delay_mod_freq, prob_l_mod_freq)
+print("Energy = {}".format(ret['energy']))
+print("Total time = {}".format(ret['time']))
+
+
