@@ -23,9 +23,19 @@ sockets = []
 for i in range(0, num_conn):
     port = 5550 + i
     sockets.append(context.socket(zmq.DEALER))
-    sockets[i].connect("tcp://127.0.0.1:"+str(port))
+    sockets[i].connect("tcp://10.10.10.1:"+str(port))
 
-length = 1000
+
+### Energy measurement start ###
+control_socket = context.socket(zmq.DEALER)
+control_socket.connect("tcp://10.10.10.1:"+str(5540))
+control_message = pickle.dumps({'task':'energy_measure_start', 'args':None})
+control_socket.send(control_message)
+data = control_socket.recv()
+### Energy measurement start ###
+
+
+length = 10
 f = 6
 t = np.array(range(0, length))/length
 
@@ -42,6 +52,8 @@ plm_sig_empty_loop = (np.sin(2 * np.pi * f * t - np.pi / 2) + 1) / 2 * 50000
 plm_sig_random_gen = (np.sin(2 * np.pi * f * t - np.pi / 2) + 1) / 2 * 500
 
 #sig = np.ones(length)/10000
+
+total_time_start = time.time()
 
 time_diff=0
 for j in range(0, length):
@@ -68,3 +80,13 @@ for j in range(0, length):
 #    print("time")
 #    print(time.time()-start)
 
+total_time = time.time() - total_time_start
+
+### Energy measurement stop ###
+control_message = pickle.dumps({'task':'energy_measure_stop', 'args':None})
+control_socket.send(control_message)
+energy = control_socket.recv()
+energy = float(energy)
+print("Energy = {}".format(energy))
+print("Total time = {}".format(total_time))
+### Energy measurement stop ###
