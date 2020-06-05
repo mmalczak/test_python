@@ -5,21 +5,13 @@ import numpy as np
 
 class Client():
 
-    def __init__(self):
+    def __init__(self, task):
         self.context = zmq.Context()
         
         self.num_conn = 4
         
-        self.task = "fft"
-        self.args = [1]+[0]*31
-        #self.args = [1]
-        #self.task = "empty_loop"
-        #self.args = 500000
-        #self.task = "random_gen"
-        #self.args = 10
-        #self.task = "receive_array"
-        #self.args = [1, 2, 3, 4, 5]
-
+        self.task = task 
+        
         self.sockets = []
         for i in range(0, self.num_conn):
             port = 5550 + i
@@ -90,8 +82,16 @@ class Client():
         print("Energy = {}".format(energy))
         print("Total time = {}".format(total_time))
 
-client = Client()
 
+# Available tasks with example arguments
+# "fft" [1]+[0]*31
+# "empty_loop" 500000
+# "random_gen" 10
+# "receive_array" [1, 2, 3, 4, 5]
+
+
+task = "fft"
+client = Client(task)
 num_tasks = 10
 delay_mod_freq = 6
 prob_l_mod_freq = 3
