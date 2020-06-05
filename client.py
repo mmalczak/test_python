@@ -7,12 +7,10 @@ class Client():
 
     def __init__(self, task):
         self.context = zmq.Context()
-        
         self.num_conn = 4
-        
         self.task = task 
-        
         self.sockets = []
+        
         for i in range(0, self.num_conn):
             port = 5550 + i
             self.sockets.append(self.context.socket(zmq.DEALER))
@@ -23,6 +21,7 @@ class Client():
 
     def init_arrays(self, num_tasks):
         t = np.array(range(0, num_tasks))/num_tasks
+        
         #delay modulation
         self.dm_sig_sin = (np.sin(2 * np.pi * delay_mod_freq * t + np.pi / 2) + 1) / 2 / 50
         c = 10
@@ -33,8 +32,6 @@ class Client():
         self.plm_sig_fft = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 512
         self.plm_sig_empty_loop = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 50000
         self.plm_sig_random_gen = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 500
- 
-
 
     def start(self, num_task, delay_mod_freq, prob_l_freq):
         self.init_arrays(num_tasks)
@@ -88,7 +85,6 @@ class Client():
 # "empty_loop" 500000
 # "random_gen" 10
 # "receive_array" [1, 2, 3, 4, 5]
-
 
 task = "fft"
 client = Client(task)
