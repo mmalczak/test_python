@@ -20,7 +20,7 @@ class Client():
         self.control_socket = self.context.socket(zmq.DEALER)
         self.control_socket.connect("tcp://10.10.10.1:"+str(5540))
 
-    def init_arrays(self, num_tasks):
+    def init_arrays(self, num_tasks, delay_mod_freq, prob_l_freq):
         t = np.array(range(0, num_tasks))/num_tasks
         
         #delay modulation
@@ -34,8 +34,8 @@ class Client():
         self.plm_sig_empty_loop = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 50000
         self.plm_sig_random_gen = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 500
 
-    def time_energy_measurement(self, num_task, delay_mod_freq, prob_l_freq):
-        self.init_arrays(num_tasks)
+    def time_energy_measurement(self, num_tasks, delay_mod_freq, prob_l_freq):
+        self.init_arrays(num_tasks, delay_mod_freq, prob_l_freq)
 
         ### Energy measurement start ###
         control_message = pickle.dumps({'task':'energy_measure_start', 'args':None})
