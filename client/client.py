@@ -91,8 +91,7 @@ class Client():
             energy_list.append(ret['energy'])
             time_list.append(ret['time'])
 
-        plt.scatter(energy_list, time_list)
-        plt.show()
+        return {'energy_list':energy_list, 'time_list':time_list}
 
     def set_scaling_governor(self, governor):
         control_message = pickle.dumps({'task':'set_scaling_governor', 'args':governor})
@@ -106,6 +105,26 @@ class Client():
         status = self.control_socket.recv()
         #print(status)
 
+    def governors_compare(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq):
+        ## warmup ##
+        self.set_scaling_governor('ondemand')
+        ret_od = self.time_energy_stats(1, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+        ## warmup ##
+
+        self.set_scaling_governor('ondemand')
+        ret_od = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+
+        self.set_scaling_governor('adaptive')
+        self.set_uc(40)
+        ret_adapt = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+
+        plt.scatter(ret_od['energy_list'], ret_od['time_list'], color='blue', label='ondemand')
+        plt.scatter(ret_adapt['energy_list'], ret_adapt['time_list'], color='red', label='adaptive')
+        plt.legend()
+        plt.xlabel('energy')
+        plt.ylabel('time')
+        plt.show()
+
 
 
 # Available tasks with example arguments
@@ -114,11 +133,11 @@ class Client():
 # "random_gen" 10
 # "receive_array" [1, 2, 3, 4, 5]
 
-task = "fft"
 client = Client()
+task = "fft"
 num_tasks = 10
 delay_mod_freq = 6
 prob_l_mod_freq = 3
-num_measurements = 20
-client.time_energy_stats(num_measurements, num_tasks, delay_mod_freq, prob_l_mod_freq)
+num_measurements = 100
+client.governors_compare(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
 
