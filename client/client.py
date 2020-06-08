@@ -91,6 +91,13 @@ class Client():
         plt.scatter(energy_list, time_list)
         plt.show()
 
+    def set_scaling_governor(self, governor):
+        control_message = pickle.dumps({'task':'set_scaling_governor', 'args':governor})
+        self.control_socket.send(control_message)
+        status = self.control_socket.recv()
+        #print(status)
+
+
 
 # Available tasks with example arguments
 # "fft" [1]+[0]*31

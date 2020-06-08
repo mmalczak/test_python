@@ -18,6 +18,15 @@ class controller_class():
         energy = out.stdout
         return energy
 
+    def set_scaling_governor(self, args):
+        out = run(["echo " + args +
+            " > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor"],
+            shell=True)
+        if out.returncode is 0:
+            return b"Success"
+        else:
+            return b"Error"
+
 context = zmq.Context()
 socket = context.socket(zmq.ROUTER)
 port = 5540
