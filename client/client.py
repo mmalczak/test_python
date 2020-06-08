@@ -34,7 +34,7 @@ class Client():
         self.plm_sig_empty_loop = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 50000
         self.plm_sig_random_gen = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 500
 
-    def start(self, num_task, delay_mod_freq, prob_l_freq):
+    def time_energy_measurement(self, num_task, delay_mod_freq, prob_l_freq):
         self.init_arrays(num_tasks)
 
         ### Energy measurement start ###
@@ -93,7 +93,7 @@ prob_l_mod_freq = 3
 energy_list = []
 time_list = []
 for i in range(100):
-    ret = client.start(num_tasks, delay_mod_freq, prob_l_mod_freq)
+    ret = client.time_energy_measurement(num_tasks, delay_mod_freq, prob_l_mod_freq)
     #print("Energy = {}".format(ret['energy']))
     #print("Total time = {}".format(ret['time']))
     energy_list.append(ret['energy'])
