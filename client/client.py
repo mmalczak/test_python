@@ -77,6 +77,20 @@ class Client():
         energy = float(energy)
         ### Energy measurement stop ###
         return {'energy':energy, 'time':total_time}
+    
+    def time_energy_stats(self, num_measurements, num_tasks, delay_mod_freq, prob_l_mod_freq):
+        energy_list = []
+        time_list = []
+        for i in range(num_measurements):
+            ret = self.time_energy_measurement(num_tasks, delay_mod_freq, prob_l_mod_freq)
+            #print("Energy = {}".format(ret['energy']))
+            #print("Total time = {}".format(ret['time']))
+            energy_list.append(ret['energy'])
+            time_list.append(ret['time'])
+        
+        plt.scatter(energy_list, time_list)
+        plt.show()
+
 
 # Available tasks with example arguments
 # "fft" [1]+[0]*31
@@ -89,15 +103,6 @@ client = Client(task)
 num_tasks = 10
 delay_mod_freq = 6
 prob_l_mod_freq = 3
+num_measurements = 20
+client.time_energy_stats(num_measurements, num_tasks, delay_mod_freq, prob_l_mod_freq)
 
-energy_list = []
-time_list = []
-for i in range(100):
-    ret = client.time_energy_measurement(num_tasks, delay_mod_freq, prob_l_mod_freq)
-    #print("Energy = {}".format(ret['energy']))
-    #print("Total time = {}".format(ret['time']))
-    energy_list.append(ret['energy'])
-    time_list.append(ret['time'])
-
-plt.scatter(energy_list, time_list)
-plt.show()
