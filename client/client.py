@@ -6,10 +6,9 @@ import matplotlib.pyplot as plt
 
 class Client():
 
-    def __init__(self, task):
+    def __init__(self):
         self.context = zmq.Context()
         self.num_conn = 4
-        self.task = task 
         self.sockets = []
         
         for i in range(0, self.num_conn):
@@ -34,7 +33,7 @@ class Client():
         self.plm_sig_empty_loop = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 50000
         self.plm_sig_random_gen = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 500
 
-    def time_energy_measurement(self, num_tasks, delay_mod_freq, prob_l_freq):
+    def time_energy_measurement(self, task, num_tasks, delay_mod_freq, prob_l_freq):
         self.init_arrays(num_tasks, delay_mod_freq, prob_l_freq)
 
         ### Energy measurement start ###
@@ -52,7 +51,7 @@ class Client():
             args = [1]+[0]*int(self.plm_sig_fft[j])
         #    args = int(self.plm_sig_empty_loop[j])
         #    args = int(self.plm_sig_random_gen[j])
-            message = pickle.dumps({'task':self.task, 'args':args})
+            message = pickle.dumps({'task':task, 'args':args})
             start = time.time()
             for i in range(0, self.num_conn):
                 self.sockets[i].send(message)
@@ -78,11 +77,11 @@ class Client():
         ### Energy measurement stop ###
         return {'energy':energy, 'time':total_time}
     
-    def time_energy_stats(self, num_measurements, num_tasks, delay_mod_freq, prob_l_mod_freq):
+    def time_energy_stats(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq):
         energy_list = []
         time_list = []
         for i in range(num_measurements):
-            ret = self.time_energy_measurement(num_tasks, delay_mod_freq, prob_l_mod_freq)
+            ret = self.time_energy_measurement(task, num_tasks, delay_mod_freq, prob_l_mod_freq)
             #print("Energy = {}".format(ret['energy']))
             #print("Total time = {}".format(ret['time']))
             energy_list.append(ret['energy'])
@@ -106,7 +105,7 @@ class Client():
 # "receive_array" [1, 2, 3, 4, 5]
 
 task = "fft"
-client = Client(task)
+client = Client()
 num_tasks = 10
 delay_mod_freq = 6
 prob_l_mod_freq = 3
