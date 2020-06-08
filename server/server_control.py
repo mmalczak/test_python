@@ -27,6 +27,17 @@ class controller_class():
         else:
             return b"Error"
 
+    def set_uc(self, args):
+        out = run(["echo " + str(args) +
+            " > /sys/devices/system/cpu/cpufreq/adaptive/uc"],
+            shell=True)
+        if out.returncode is 0:
+            return b"Success"
+        else:
+            return b"Error"
+
+
+
 context = zmq.Context()
 socket = context.socket(zmq.ROUTER)
 port = 5540

@@ -100,6 +100,12 @@ class Client():
         status = self.control_socket.recv()
         #print(status)
 
+    def set_uc(self, uc):
+        control_message = pickle.dumps({'task':'set_uc', 'args':uc})
+        self.control_socket.send(control_message)
+        status = self.control_socket.recv()
+        #print(status)
+
 
 
 # Available tasks with example arguments
