@@ -108,21 +108,32 @@ class Client():
     def governors_compare(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq):
         ## warmup ##
         self.set_scaling_governor('ondemand')
-        ret_od = self.time_energy_stats(1, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+        self.time_energy_stats(1, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
         ## warmup ##
 
         self.set_scaling_governor('ondemand')
         ret_od = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+        ret_od['governor'] = ['ondemand'] * num_measurements
+        ret_od['uc'] = ['NA'] * num_measurements
 
         self.set_scaling_governor('adaptive')
-        self.set_uc(40)
+        self.set_uc(70)
         ret_adapt = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+        ret_adapt['governor'] = ['adaptive'] * num_measurements
+        ret_adapt['uc'] = ['70'] * num_measurements
 
-        plt.scatter(ret_od['energy_list'], ret_od['time_list'], color='blue', label='ondemand')
-        plt.scatter(ret_adapt['energy_list'], ret_adapt['time_list'], color='red', label='adaptive')
-        plt.legend()
-        plt.xlabel('energy')
-        plt.ylabel('time')
+        self.set_scaling_governor('adaptive')
+        self.set_uc(80)
+        ret_adapt1 = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+        ret_adapt1['governor'] = ['adaptive'] * num_measurements
+        ret_adapt1['uc'] = ['80'] * num_measurements
+
+        pd_od = pd.DataFrame(ret_od)
+        pd_adapt = pd.DataFrame(ret_adapt)
+        pd_adapt1 = pd.DataFrame(ret_adapt1)
+        data = pd.concat([pd_od, pd_adapt, pd_adapt1])
+        sns.set()
+        sns.relplot(x='energy_list', y='time_list', hue='uc', style='governor', data=data);
         plt.show()
 
 
