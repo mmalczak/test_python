@@ -171,6 +171,8 @@ class Client():
         #print(status)
 
     def get_governor_data(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, governor, uc):
+        print(governor)
+        print(uc)
         self.set_scaling_governor(governor)
         if uc is not 'NA':
             self.set_uc(uc)
