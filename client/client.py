@@ -3,6 +3,69 @@ import pickle
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+from matplotlib.patches import Ellipse
+import matplotlib.transforms as transforms
+
+def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
+    """
+    Create a plot of the covariance confidence ellipse of *x* and *y*.
+
+    Parameters
+    ----------
+    x, y : array-like, shape (n, )
+        Input data.
+
+    ax : matplotlib.axes.Axes
+        The axes object to draw the ellipse into.
+
+    n_std : float
+        The number of standard deviations to determine the ellipse's radiuses.
+
+    **kwargs
+        Forwarded to `~matplotlib.patches.Ellipse`
+
+    Returns
+    -------
+    matplotlib.patches.Ellipse
+    """
+    if x.size != y.size:
+        raise ValueError("x and y must be the same size")
+
+    cov = np.cov(x, y)
+    pearson = cov[0, 1]/np.sqrt(cov[0, 0] * cov[1, 1])
+    # Using a special case to obtain the eigenvalues of this
+    # two-dimensionl dataset.
+    ell_radius_x = np.sqrt(1 + pearson)
+    ell_radius_y = np.sqrt(1 - pearson)
+    ellipse = Ellipse((0, 0), width=ell_radius_x * 2, height=ell_radius_y * 2,
+                      facecolor=facecolor, **kwargs)
+
+    # Calculating the stdandard deviation of x from
+    # the squareroot of the variance and multiplying
+    # with the given number of standard deviations.
+    scale_x = np.sqrt(cov[0, 0]) * n_std
+    mean_x = np.mean(x)
+
+    # calculating the stdandard deviation of y ...
+    scale_y = np.sqrt(cov[1, 1]) * n_std
+    mean_y = np.mean(y)
+
+    transf1 = transforms.Affine2D().rotate_deg(45)
+    transf2 = transforms.Affine2D().scale(scale_x, scale_y)
+    transf3 = transforms.Affine2D().translate(mean_x, mean_y)
+
+
+    ellipse.set_transform(transf1 + transf2 + transf3 + ax.transData)
+    return ax.add_patch(ellipse)
+
+def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
+    plt.scatter(data['energy_list'], data['time_list'], color=color, marker=marker, label=label)
+    confidence_ellipse(data['energy_list'], data['time_list'], ax_kwargs, n_std=1, edgecolor=color)
+    plt.xlabel('energy')
+    plt.ylabel('time')
 
 class Client():
 
@@ -85,6 +148,7 @@ class Client():
         energy_list = []
         time_list = []
         for i in range(num_measurements):
+            print(i)
             ret = self.time_energy_measurement(task, num_tasks, delay_mod_freq, prob_l_mod_freq)
             #print("Energy = {}".format(ret['energy']))
             #print("Total time = {}".format(ret['time']))
@@ -105,35 +169,72 @@ class Client():
         status = self.control_socket.recv()
         #print(status)
 
+    def get_governor_data(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, governor, uc):
+        self.set_scaling_governor(governor)
+        if uc is not 'NA':
+            self.set_uc(uc)
+        ret = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+        ret['governor'] = [governor] * num_measurements
+        ret['uc'] = [str(uc)] * num_measurements
+        ret_pd = pd.DataFrame(ret)
+        return ret_pd
+
     def governors_compare(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq):
         ## warmup ##
         self.set_scaling_governor('ondemand')
-        self.time_energy_stats(1, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+        self.time_energy_stats(5, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
         ## warmup ##
 
-        self.set_scaling_governor('ondemand')
-        ret_od = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
-        ret_od['governor'] = ['ondemand'] * num_measurements
-        ret_od['uc'] = ['NA'] * num_measurements
 
-        self.set_scaling_governor('adaptive')
-        self.set_uc(70)
-        ret_adapt = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
-        ret_adapt['governor'] = ['adaptive'] * num_measurements
-        ret_adapt['uc'] = ['70'] * num_measurements
-
-        self.set_scaling_governor('adaptive')
-        self.set_uc(80)
-        ret_adapt1 = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
-        ret_adapt1['governor'] = ['adaptive'] * num_measurements
-        ret_adapt1['uc'] = ['80'] * num_measurements
-
-        pd_od = pd.DataFrame(ret_od)
-        pd_adapt = pd.DataFrame(ret_adapt)
-        pd_adapt1 = pd.DataFrame(ret_adapt1)
-        data = pd.concat([pd_od, pd_adapt, pd_adapt1])
         sns.set()
-        sns.relplot(x='energy_list', y='time_list', hue='uc', style='governor', data=data);
+        fig, ax_kwargs = plt.subplots()
+
+        data  = pd.DataFrame()
+
+
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'performance', 'NA')
+        data = pd.concat([data, data_gov])
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0.7, 0.7, 0.7), 'o', 'performance')
+
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'powersave', 'NA')
+        data = pd.concat([data, data_gov])
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0.3, 0.3, 0.3), 'o', 'powersave')
+
+
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'ondemand', 'NA')
+        data = pd.concat([data, data_gov])
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0, 0, 0), 's', 'ondemand')
+
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 1)
+        data = pd.concat([data, data_gov])
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'b', 'x', 'adaptive, uc = 1')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 20)
+        data = pd.concat([data, data_gov])
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'g', 'x', 'adaptive, uc = 20')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 40)
+        data = pd.concat([data, data_gov])
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'r', 'x', 'adaptive, uc = 50')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 50)
+        data = pd.concat([data, data_gov])
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'c', 'x', 'adaptive, uc = 60')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 60)
+        data = pd.concat([data, data_gov])
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'm', 'x', 'adaptive, uc = 80')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 80)
+        data = pd.concat([data, data_gov])
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'y', 'x', 'adaptive, uc = 99')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 99)
+        data = pd.concat([data, data_gov])
+
+
+        #a = sns.relplot(x='energy_list', y='time_list', hue='uc', style='governor', data=data);
+
+        #plt.scatter(data['energy_list'], data['time_list'], color='blue')
+        #confidence_ellipse(data['energy_list'], data['time_list'], ax_kwargs, n_std=1, edgecolor='blue')
+        #plt.scatter(data_gov['energy_list'], data_gov['time_list'])
+        #confidence_ellipse(data_gov['energy_list'], data_gov['time_list'], ax_kwargs, alpha=0.5)
+        plt.legend()
+
         plt.show()
 
 
@@ -146,9 +247,9 @@ class Client():
 
 client = Client()
 task = "fft"
-num_tasks = 10
+num_tasks = 6
 delay_mod_freq = 6
 prob_l_mod_freq = 3
-num_measurements = 100
+num_measurements = 5
 client.governors_compare(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
 
