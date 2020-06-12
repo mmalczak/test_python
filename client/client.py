@@ -89,7 +89,6 @@ class Client():
         #delay modulation
         self.dm_sig_sin = (np.sin(2 * np.pi * delay_mod_freq * t + np.pi / 2) + 1) / 2 / 50
         c = 10
-        #self.dm_sig_square = [1/5 if (el%(num_tasks/delay_mod_freq)<(num_tasks/(c*2*delay_mod_freq))) else 0 for el in range(num_tasks)]
         self.dm_sig_square = [0 if (el%(num_tasks/delay_mod_freq)<((2*c-1)/c)*(num_tasks/(2*delay_mod_freq))) else 1/5 for el in range(num_tasks)]
 
         #problem length modulation
@@ -105,13 +104,11 @@ class Client():
                 self.sockets[i].send(message)
             for i in range(0, self.num_conn):
                 data = self.sockets[i].recv()
-        #        print(data)
 
             time_diff = time.time() - start
             sleep_time = self.dm_sig_square[j] - time_diff
             if sleep_time > 0:
                 time.sleep(sleep_time)
-        #    print(time.time()-start)
 
     def time_energy_measurement(self, task, num_tasks, delay_mod_freq, prob_l_freq, prob_l_mod_scale):
         self.init_arrays(num_tasks, delay_mod_freq, prob_l_freq, prob_l_mod_scale)
@@ -147,8 +144,6 @@ class Client():
         for i in range(num_measurements):
             print("sample idx = " + str(i))
             ret = self.time_energy_measurement(task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
-            #print("Energy = {}".format(ret['energy']))
-            #print("Total time = {}".format(ret['time']))
             energy_list.append(ret['energy'])
             time_list.append(ret['time'])
 
@@ -158,13 +153,11 @@ class Client():
         control_message = pickle.dumps({'task':'set_scaling_governor', 'args':governor})
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
-        #print(status)
 
     def set_uc(self, uc):
         control_message = pickle.dumps({'task':'set_uc', 'args':uc})
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
-        #print(status)
 
     def get_governor_data(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, governor, uc):
         print(governor)
