@@ -83,7 +83,7 @@ class Client():
         self.control_socket = self.context.socket(zmq.DEALER)
         self.control_socket.connect("tcp://10.10.10.1:"+str(5540))
 
-    def init_arrays(self, num_tasks, delay_mod_freq, prob_l_freq):
+    def init_arrays(self, num_tasks, delay_mod_freq, prob_l_freq, prob_l_mod_scale):
         t = np.array(range(0, num_tasks))/num_tasks
 
         #delay modulation
@@ -93,7 +93,7 @@ class Client():
         self.dm_sig_square = [0 if (el%(num_tasks/delay_mod_freq)<((2*c-1)/c)*(num_tasks/(2*delay_mod_freq))) else 1/5 for el in range(num_tasks)]
 
         #problem length modulation
-        self.plm_sig_fft = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 512
+        self.plm_sig_fft = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 512 * prob_l_mod_scale
         self.plm_sig_empty_loop = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 50000
         self.plm_sig_random_gen = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 500
 
@@ -117,8 +117,8 @@ class Client():
                 time.sleep(sleep_time)
         #    print(time.time()-start)
 
-    def time_energy_measurement(self, task, num_tasks, delay_mod_freq, prob_l_freq):
-        self.init_arrays(num_tasks, delay_mod_freq, prob_l_freq)
+    def time_energy_measurement(self, task, num_tasks, delay_mod_freq, prob_l_freq, prob_l_mod_scale):
+        self.init_arrays(num_tasks, delay_mod_freq, prob_l_freq, prob_l_mod_scale)
 
         ### Energy measurement start ###
         control_message = pickle.dumps({'task':'energy_measure_start', 'args':None})
@@ -145,12 +145,12 @@ class Client():
 
         return {'energy':energy, 'time':total_time}
 
-    def time_energy_stats(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq):
+    def time_energy_stats(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale):
         energy_list = []
         time_list = []
         for i in range(num_measurements):
-            print(i)
-            ret = self.time_energy_measurement(task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+            print("sample idx = " + str(i))
+            ret = self.time_energy_measurement(task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
             #print("Energy = {}".format(ret['energy']))
             #print("Total time = {}".format(ret['time']))
             energy_list.append(ret['energy'])
@@ -170,52 +170,67 @@ class Client():
         status = self.control_socket.recv()
         #print(status)
 
-    def get_governor_data(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, governor, uc):
+    def get_governor_data(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, governor, uc):
         print(governor)
-        print(uc)
+        print("uc = " + str(uc))
         self.set_scaling_governor(governor)
         if uc is not 'NA':
             self.set_uc(uc)
-        ret = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+        ret = self.time_energy_stats(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
         ret['governor'] = [governor] * num_measurements
         ret['uc'] = [str(uc)] * num_measurements
         return ret
 
-    def governors_compare(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq):
+    def governors_compare(self, num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale):
+        print("Problem length modulation scale = " + str(prob_l_mod_scale))
+        print("Number of tasks = " + str(num_tasks))
         ## warmup ##
         self.set_scaling_governor('ondemand')
-        self.time_energy_stats(5, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+        self.time_energy_stats(1, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
         ## warmup ##
 
 
         sns.set()
         fig, ax_kwargs = plt.subplots()
 
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'performance', 'NA')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'performance', 'NA')
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0.7, 0.7, 0.7), 'o', 'performance')
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'powersave', 'NA')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'powersave', 'NA')
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0.3, 0.3, 0.3), 'o', 'powersave')
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'ondemand', 'NA')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'ondemand', 'NA')
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0, 0, 0), 's', 'ondemand')
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 1)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'b', 'x', 'adaptive, uc = 1')
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 20)
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'adaptive', 0)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'b', 'x', 'adaptive, uc = 0')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'adaptive', 20)
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'g', 'x', 'adaptive, uc = 20')
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 40)
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'adaptive', 40)
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'r', 'x', 'adaptive, uc = 50')
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 50)
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'adaptive', 50)
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'c', 'x', 'adaptive, uc = 60')
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 60)
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'adaptive', 60)
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'm', 'x', 'adaptive, uc = 80')
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 80)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'y', 'x', 'adaptive, uc = 99')
-        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, 'adaptive', 99)
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'adaptive', 80)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'y', 'x', 'adaptive, uc = 100')
+        data_gov = self.get_governor_data(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, 'adaptive', 100)
 
         plt.legend()
 
-        plt.show()
+#        plt.show()
+        figure = plt.gcf()
+        figure.set_size_inches(16, 12)
+        plt.savefig('/home/miloszm/projects/test_python/plots/' + 'num_tasks_' + str(num_tasks) + ' plm_scale_' + str(prob_l_mod_scale) + '.png')
 
-
+    def sweep_num_tasks(self, num_measurements, task, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale):
+        self.governors_compare(num_measurements, task, 2, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
+        self.governors_compare(num_measurements, task, 4, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
+        self.governors_compare(num_measurements, task, 8, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
+        self.governors_compare(num_measurements, task, 16, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
+        self.governors_compare(num_measurements, task, 32, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
+        #self.governors_compare(num_measurements, task, 64, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
+        #self.governors_compare(num_measurements, task, 128, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
+        #self.governors_compare(num_measurements, task, 256, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
+        #self.governors_compare(num_measurements, task, 512, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
+        #self.governors_compare(num_measurements, task, 1024, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
 
 # Available tasks with example arguments
 # "fft" [1]+[0]*31
@@ -225,9 +240,20 @@ class Client():
 
 client = Client()
 task = "fft"
-num_tasks = 6
+#num_tasks = 6
 delay_mod_freq = 6
 prob_l_mod_freq = 3
+#prob_l_mod_scale = 1
 num_measurements = 5
-client.governors_compare(num_measurements, task, num_tasks, delay_mod_freq, prob_l_mod_freq)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 1)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 2)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 4)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 8)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 16)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 32)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 64)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 128)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 256)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 512)
+client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 1024)
 
