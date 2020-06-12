@@ -128,8 +128,6 @@ class Client():
         if uc is not 'NA':
             self.set_uc(uc)
         ret = self.time_energy_stats()
-        ret['governor'] = [governor] * self.num_measurements
-        ret['uc'] = [str(uc)] * self.num_measurements
         return ret
 
     def governors_compare(self):
