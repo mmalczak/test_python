@@ -42,8 +42,6 @@ class Client():
         t = np.array(range(0, self.num_tasks))/self.num_tasks
 
         #delay modulation
-        phase = 2 * np.pi * self.delay_mod_freq * t + np.pi / 2
-        self.dm_sig_sin = (np.sin(phase) + 1) / 2 / 50
         c = 10
         tasks_per_period = self.num_tasks/self.delay_mod_freq
         self.dm_sig_square = [0 if (el%(tasks_per_period)<((2*c-1)/c)*(tasks_per_period/2))
