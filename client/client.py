@@ -78,10 +78,10 @@ class Client():
         for i in range(0, self.num_conn):
             port = 5550 + i
             self.sockets.append(self.context.socket(zmq.DEALER))
-            self.sockets[i].connect("tcp://10.10.10.1:"+str(port))
+            self.sockets[i].connect("tcp://127.0.0.1:"+str(port))
 
         self.control_socket = self.context.socket(zmq.DEALER)
-        self.control_socket.connect("tcp://10.10.10.1:"+str(5540))
+        self.control_socket.connect("tcp://127.0.0.1:"+str(5540))
 
     def init_arrays(self, num_tasks, delay_mod_freq, prob_l_freq, prob_l_mod_scale):
         t = np.array(range(0, num_tasks))/num_tasks
