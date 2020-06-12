@@ -94,15 +94,11 @@ class Client():
 
         #problem length modulation
         self.plm_sig_fft = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 512 * prob_l_mod_scale
-        self.plm_sig_empty_loop = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 50000
-        self.plm_sig_random_gen = (np.sin(2 * np.pi * prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 500
 
     def stress_server(self, task, num_tasks):
         time_diff=0
         for j in range(0, num_tasks):
             args = [1]+[0]*int(self.plm_sig_fft[j])
-        #    args = int(self.plm_sig_empty_loop[j])
-        #    args = int(self.plm_sig_random_gen[j])
             message = pickle.dumps({'task':task, 'args':args})
             start = time.time()
             for i in range(0, self.num_conn):
