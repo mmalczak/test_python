@@ -218,7 +218,7 @@ class Client():
 #        plt.show()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
-        plt.savefig('/home/miloszm/projects/test_python/plots/' + 'num_tasks_' + str(num_tasks) + ' plm_scale_' + str(prob_l_mod_scale) + '.png')
+        plt.savefig('/home/milosz/work/test_python/plots/' + 'num_tasks_' + str(num_tasks) + ' plm_scale_' + str(prob_l_mod_scale) + '.png')
 
     def sweep_num_tasks(self, num_measurements, task, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale):
         self.governors_compare(num_measurements, task, 2, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale)
@@ -247,13 +247,13 @@ prob_l_mod_freq = 3
 num_measurements = 5
 client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 1)
 client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 2)
-client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 4)
-client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 8)
-client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 16)
-client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 32)
-client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 64)
-client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 128)
-client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 256)
-client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 512)
-client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 1024)
+#client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 4)
+#client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 8)
+#client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 16)
+#client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 32)
+#client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 64)
+#client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 128)
+#client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 256)
+#client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 512)
+#client.sweep_num_tasks(num_measurements, task, delay_mod_freq, prob_l_mod_freq, 1024)
 
