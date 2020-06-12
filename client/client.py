@@ -8,15 +8,17 @@ from confidence_ellipse import confidence_ellipse
 
 
 def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
-    plt.scatter(data['energy_list'], data['time_list'], color=color, marker=marker, label=label)
-    confidence_ellipse(data['energy_list'], data['time_list'], ax_kwargs, n_std=1, edgecolor=color)
+    plt.scatter(data['energy_list'], data['time_list'], color=color,
+                marker=marker, label=label)
+    confidence_ellipse(data['energy_list'], data['time_list'], ax_kwargs,
+                n_std=1, edgecolor=color)
     plt.xlabel('energy')
     plt.ylabel('time')
 
 class Client():
 
-    def __init__(self, task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, num_measurements):
-
+    def __init__(self, task, num_tasks, delay_mod_freq, prob_l_mod_freq,
+                    prob_l_mod_scale, num_measurements):
         self.task = task
         self.num_tasks = num_tasks
         self.delay_mod_freq = delay_mod_freq
@@ -40,12 +42,16 @@ class Client():
         t = np.array(range(0, self.num_tasks))/self.num_tasks
 
         #delay modulation
-        self.dm_sig_sin = (np.sin(2 * np.pi * self.delay_mod_freq * t + np.pi / 2) + 1) / 2 / 50
+        phase = 2 * np.pi * self.delay_mod_freq * t + np.pi / 2
+        self.dm_sig_sin = (np.sin(phase) + 1) / 2 / 50
         c = 10
-        self.dm_sig_square = [0 if (el%(self.num_tasks/self.delay_mod_freq)<((2*c-1)/c)*(self.num_tasks/(2*self.delay_mod_freq))) else 1/5 for el in range(self.num_tasks)]
+        tasks_per_period = self.num_tasks/self.delay_mod_freq
+        self.dm_sig_square = [0 if (el%(tasks_per_period)<((2*c-1)/c)*(tasks_per_period/2))
+                                else 1/5 for el in range(self.num_tasks)]
 
         #problem length modulation
-        self.plm_sig_fft = (np.sin(2 * np.pi * self.prob_l_mod_freq * t - np.pi / 2) + 1) / 2 * 512 * self.prob_l_mod_scale
+        phase = 2 * np.pi * self.prob_l_mod_freq * t - np.pi / 2
+        self.plm_sig_fft = (np.sin(phase) + 1) / 2 * 512 * self.prob_l_mod_scale
 
     def stress_server(self):
         time_diff=0
@@ -67,7 +73,8 @@ class Client():
         self.init_arrays()
 
         ### Energy measurement start ###
-        control_message = pickle.dumps({'task':'energy_measure_start', 'args':None})
+        control_message = pickle.dumps({'task':'energy_measure_start',
+                                        'args':None})
         self.control_socket.send(control_message)
         data = self.control_socket.recv()
         ### Energy measurement start ###
@@ -83,7 +90,8 @@ class Client():
         ### Time measurement stop ###
 
         ### Energy measurement stop ###
-        control_message = pickle.dumps({'task':'energy_measure_stop', 'args':None})
+        control_message = pickle.dumps({'task':'energy_measure_stop',
+                                        'args':None})
         self.control_socket.send(control_message)
         energy = self.control_socket.recv()
         energy = float(energy)
@@ -103,7 +111,8 @@ class Client():
         return {'energy_list':energy_list, 'time_list':time_list}
 
     def set_scaling_governor(self, governor):
-        control_message = pickle.dumps({'task':'set_scaling_governor', 'args':governor})
+        control_message = pickle.dumps({'task':'set_scaling_governor',
+                                        'args':governor})
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
 
@@ -130,7 +139,6 @@ class Client():
         self.set_scaling_governor('ondemand')
         self.time_energy_stats()
         ## warmup ##
-
 
         sns.set()
         fig, ax_kwargs = plt.subplots()
@@ -160,7 +168,9 @@ class Client():
 #        plt.show()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
-        plt.savefig('/home/milosz/work/test_python/plots/' + 'num_tasks_' + str(self.num_tasks) + ' plm_scale_' + str(self.prob_l_mod_scale) + '.png')
+        plt.savefig('/home/milosz/work/test_python/plots/' +
+                'num_tasks_' + str(self.num_tasks) +
+                ' plm_scale_' + str(self.prob_l_mod_scale) + '.png')
 
     def sweep_num_tasks(self):
         num_tasks_list = [2, 4, 8]#, 16, 32, 64, 128, 256, 512, 1024]
@@ -168,15 +178,11 @@ class Client():
             self.num_tasks = num_tasks
             self.governors_compare()
 
-
 # Available tasks with example arguments
 # "fft" [1]+[0]*31
 # "empty_loop" 500000
 # "random_gen" 10
 # "receive_array" [1, 2, 3, 4, 5]
-
-
-
 
 task = "fft"
 num_tasks = 6
@@ -184,7 +190,8 @@ delay_mod_freq = 6
 prob_l_mod_freq = 3
 prob_l_mod_scale = 1
 num_measurements = 5
-client = Client(task, num_tasks, delay_mod_freq, prob_l_mod_freq, prob_l_mod_scale, num_measurements)
+client = Client(task, num_tasks, delay_mod_freq, prob_l_mod_freq,
+                prob_l_mod_scale, num_measurements)
 prob_l_mod_scale_list = [1, 2, 4]#, 8, 16, 32, 64, 128, 256, 512, 1024]
 for prob_l_mod_scale in prob_l_mod_scale_list:
     client.prob_l_mod_scale = prob_l_mod_scale
