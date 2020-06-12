@@ -43,13 +43,20 @@ class Client():
 
         #delay modulation
         c = 10
-        tasks_per_period = self.num_tasks/self.delay_mod_freq
-        self.dm_sig_square = [0 if (el%(tasks_per_period)<((2*c-1)/c)*(tasks_per_period/2))
-                                else 1/5 for el in range(self.num_tasks)]
+        if self.delay_mod_freq == 0:
+            self.dm_sig_square = [1 / 5] * self.num_tasks
+        else:
+            tasks_per_period = self.num_tasks/self.delay_mod_freq
+            self.dm_sig_square = [0 if el % tasks_per_period <
+                                        (2 * c - 1) / c * tasks_per_period / 2
+                                    else 1 / 5 for el in range(self.num_tasks)]
 
         #problem length modulation
-        phase = 2 * np.pi * self.prob_l_mod_freq * t - np.pi / 2
-        self.plm_sig_fft = (np.sin(phase) + 1) / 2 * 512 * self.prob_l_mod_scale
+        if self.prob_l_mod_freq == 0:
+            self.plm_sig_fft = [512 * self.prob_l_mod_scale] * self.num_tasks
+        else:
+            phase = 2 * np.pi * self.prob_l_mod_freq * t - np.pi / 2
+            self.plm_sig_fft = (np.sin(phase) + 1) / 2 * 512 * self.prob_l_mod_scale
 
     def stress_server(self):
         time_diff=0
