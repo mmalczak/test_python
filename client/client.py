@@ -18,11 +18,12 @@ def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
 class Client():
 
     def __init__(self, task, num_tasks, delay_mod_freq, prob_l_mod_freq,
-                    prob_l_mod_scale, num_measurements):
+                    delay_mod_scale, prob_l_mod_scale, num_measurements):
         self.task = task
         self.num_tasks = num_tasks
         self.delay_mod_freq = delay_mod_freq
         self.prob_l_mod_freq = prob_l_mod_freq
+        self.delay_mod_scale = delay_mod_scale
         self.prob_l_mod_scale = prob_l_mod_scale
         self.num_measurements = num_measurements
 
@@ -44,12 +45,12 @@ class Client():
         #delay modulation
         c = 10
         if self.delay_mod_freq == 0:
-            self.dm_sig_square = [1 / 5] * self.num_tasks
+            self.dm_sig_square = [self.delay_mod_scale] * self.num_tasks
         else:
             tasks_per_period = self.num_tasks/self.delay_mod_freq
             self.dm_sig_square = [0 if el % tasks_per_period <
                                         (2 * c - 1) / c * tasks_per_period / 2
-                                    else 1 / 5 for el in range(self.num_tasks)]
+                                    else self.delay_mod_scale for el in range(self.num_tasks)]
 
         #problem length modulation
         if self.prob_l_mod_freq == 0:
@@ -191,10 +192,11 @@ task = "fft"
 num_tasks = 6
 delay_mod_freq = 6
 prob_l_mod_freq = 3
+delay_mod_scale = 1 / 5
 prob_l_mod_scale = 1
 num_measurements = 5
 client = Client(task, num_tasks, delay_mod_freq, prob_l_mod_freq,
-                prob_l_mod_scale, num_measurements)
+                delay_mod_scale, prob_l_mod_scale, num_measurements)
 prob_l_mod_scale_list = [1, 2, 4]#, 8, 16, 32, 64, 128, 256, 512, 1024]
 for prob_l_mod_scale in prob_l_mod_scale_list:
     client.prob_l_mod_scale = prob_l_mod_scale
