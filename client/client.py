@@ -43,30 +43,27 @@ class Client():
         t = np.array(range(0, self.num_tasks))/self.num_tasks
 
         #delay modulation
-        c = 10
         if self.delay_mod_freq == 0:
-            self.dm_sig_square = [self.delay_mod_scale] * self.num_tasks
+            self.dm_sig_sin = [self.delay_mod_scale] * self.num_tasks
         else:
-            tasks_per_period = self.num_tasks/self.delay_mod_freq
-            self.dm_sig_square = [0 if el % tasks_per_period <
-                                        (2 * c - 1) / c * tasks_per_period / 2
-                                    else self.delay_mod_scale for el in range(self.num_tasks)]
+            phase = 2 * np.pi * self.delay_mod_freq * t - np.pi / 2
+            self.dm_sig_sin = (np.sin(phase) + 1) / 2 * self.delay_mod_scale
 
         #problem length modulation
         if self.prob_l_mod_freq == 0:
-            self.plm_sig_fft = [512 * self.prob_l_mod_scale] * self.num_tasks
+            self.plm_sig_sin = [512 * self.prob_l_mod_scale] * self.num_tasks
         else:
             phase = 2 * np.pi * self.prob_l_mod_freq * t - np.pi / 2
-            self.plm_sig_fft = (np.sin(phase) + 1) / 2 * 512 * self.prob_l_mod_scale
+            self.plm_sig_sin = (np.sin(phase) + 1) / 2 * 512 * self.prob_l_mod_scale
 
         if modulation_plots:
             #plt.ion()
             #plt.show()
             plt.subplot(2, 1, 1, title="Delay modulation signal")
-            plt.plot(self.dm_sig_square)
+            plt.plot(self.dm_sig_sin)
             #plt.pause(0.1)
             plt.subplot(2, 1, 2, title="Problem length modulation signal")
-            plt.plot(self.plm_sig_fft)
+            plt.plot(self.plm_sig_sin)
             #plt.pause(0.1)
             #plt.show()
             figure = plt.gcf()
@@ -77,7 +74,7 @@ class Client():
     def stress_server(self):
         time_diff=0
         for j in range(0, self.num_tasks):
-            args = [1]+[0]*int(self.plm_sig_fft[j])
+            args = [1]+[0]*int(self.plm_sig_sin[j])
             message = pickle.dumps({'task':self.task, 'args':args})
             start = time.time()
             for i in range(0, self.num_conn):
@@ -86,7 +83,7 @@ class Client():
                 data = self.sockets[i].recv()
 
             time_diff = time.time() - start
-            sleep_time = self.dm_sig_square[j] - time_diff
+            sleep_time = self.dm_sig_sin[j] - time_diff
             if sleep_time > 0:
                 time.sleep(sleep_time)
 
