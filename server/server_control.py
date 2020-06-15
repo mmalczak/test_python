@@ -36,7 +36,19 @@ class controller_class():
         else:
             return b"Error"
 
+    def reset_tlm(self, args):
+        out = run(['sudo ~/work/telemetry/./tlm'], shell=True,
+                                                    stdout=PIPE, stderr=PIPE)
+        if out.returncode is 0:
+            return b"Success"
+        else:
+            return b"Error"
 
+    def read_tlm(self, args):
+        out = run(['sudo ~/work/telemetry/./tlm -f csv'], shell=True,
+                                                    stdout=PIPE, stderr=PIPE)
+        tlm_data = out.stdout
+        return tlm_data
 
 context = zmq.Context()
 socket = context.socket(zmq.ROUTER)
