@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from confidence_ellipse import confidence_ellipse
-
+from plot_kernel_data import plot_kernel_data
 
 def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
     plt.scatter(data['energy_list'], data['time_list'], color=color,
@@ -39,7 +39,7 @@ class Client():
         self.control_socket = self.context.socket(zmq.DEALER)
         self.control_socket.connect("tcp://127.0.0.1:"+str(5540))
 
-    def init_arrays(self):
+    def init_arrays(self, modulation_plots):
         t = np.array(range(0, self.num_tasks))/self.num_tasks
 
         #delay modulation
@@ -59,6 +59,21 @@ class Client():
             phase = 2 * np.pi * self.prob_l_mod_freq * t - np.pi / 2
             self.plm_sig_fft = (np.sin(phase) + 1) / 2 * 512 * self.prob_l_mod_scale
 
+        if modulation_plots:
+            #plt.ion()
+            #plt.show()
+            plt.subplot(2, 1, 1, title="Delay modulation signal")
+            plt.plot(self.dm_sig_square)
+            #plt.pause(0.1)
+            plt.subplot(2, 1, 2, title="Problem length modulation signal")
+            plt.plot(self.plm_sig_fft)
+            #plt.pause(0.1)
+            #plt.show()
+            figure = plt.gcf()
+            figure.set_size_inches(16, 12)
+            plt.savefig('/home/milosz/work/test_python/plots/mod_vs_tlm/' +
+                                                    'modulation_signals.png')
+
     def stress_server(self):
         time_diff=0
         for j in range(0, self.num_tasks):
@@ -75,8 +90,16 @@ class Client():
             if sleep_time > 0:
                 time.sleep(sleep_time)
 
-    def time_energy_measurement(self):
-        self.init_arrays()
+    def time_energy_measurement(self, modulation_plots):
+        self.init_arrays(modulation_plots)
+
+        ### telemetry reset ###
+        if modulation_plots:
+            control_message = pickle.dumps({'task':'reset_tlm',
+                                            'args':None})
+            self.control_socket.send(control_message)
+            data = self.control_socket.recv()
+        ### telemetry reset ###
 
         ### Energy measurement start ###
         control_message = pickle.dumps({'task':'energy_measure_start',
@@ -103,6 +126,15 @@ class Client():
         energy = float(energy)
         ### Energy measurement stop ###
 
+        ### telemetry read ###
+        if modulation_plots:
+            control_message = pickle.dumps({'task':'read_tlm',
+                                            'args':None})
+            self.control_socket.send(control_message)
+            data = self.control_socket.recv()
+            plot_kernel_data(data)
+        ### telemetry read ###
+
         return {'energy':energy, 'time':total_time}
 
     def time_energy_stats(self):
@@ -110,7 +142,7 @@ class Client():
         time_list = []
         for i in range(self.num_measurements):
             print("sample idx = " + str(i))
-            ret = self.time_energy_measurement()
+            ret = self.time_energy_measurement(False)
             energy_list.append(ret['energy'])
             time_list.append(ret['time'])
 
