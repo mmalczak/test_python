@@ -211,6 +211,42 @@ class Client():
                 'num_tasks_' + str(self.num_tasks) +
                 ' plm_scale_' + str(self.prob_l_mod_scale) + '.png')
 
+    def sampling_rate_compare(self, governor, uc):
+        print("Problem length modulation scale = " + str(self.prob_l_mod_scale))
+        print("Number of tasks = " + str(self.num_tasks))
+        ## warmup ##
+        self.set_scaling_governor('ondemand')
+        self.time_energy_stats()
+        ## warmup ##
+
+        sns.set()
+        fig, ax_kwargs = plt.subplots()
+
+        self.set_sampling_rate(10000)
+        data_gov = self.get_governor_data(governor, uc)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'b', 'x', 'sampling_rate = 10000')
+        self.set_sampling_rate(20000)
+        data_gov = self.get_governor_data(governor, uc)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'g', 'x', 'sampling_rate = 20000')
+        self.set_sampling_rate(40000)
+        data_gov = self.get_governor_data(governor, uc)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'r', 'x', 'sampling_rate = 40000')
+        self.set_sampling_rate(80000)
+        data_gov = self.get_governor_data(governor, uc)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'c', 'x', 'sampling_rate = 80000')
+        self.set_sampling_rate(160000)
+        data_gov = self.get_governor_data(governor, uc)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'm', 'x', 'sampling_rate = 160000')
+
+        plt.legend()
+
+#        plt.show()
+        figure = plt.gcf()
+        figure.set_size_inches(16, 12)
+        plt.savefig('/home/milosz/work/test_python/plots/' +
+                'num_tasks_' + str(self.num_tasks) +
+                ' plm_scale_' + str(self.prob_l_mod_scale) + '.png')
+
     def sweep_num_tasks(self):
         num_tasks_list = [2, 4, 8]#, 16, 32, 64, 128, 256, 512, 1024]
         for num_tasks in num_tasks_list:
