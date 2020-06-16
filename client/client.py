@@ -46,7 +46,7 @@ class Client():
         if self.delay_mod_freq == 0:
             self.dm_sig_sin = [self.delay_mod_scale] * self.num_tasks
         else:
-            phase = 2 * np.pi * self.delay_mod_freq * t - np.pi / 2
+            phase = 2 * np.pi * self.delay_mod_freq * t + np.pi / 2
             self.dm_sig_sin = (np.sin(phase) + 1) / 2 * self.delay_mod_scale
 
         #problem length modulation
