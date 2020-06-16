@@ -156,6 +156,12 @@ class Client():
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
 
+    def set_sampling_rate(self, sampling_rate):
+        control_message = pickle.dumps({'task':'set_sampling_rate',
+                                                        'args':sampling_rate})
+        self.control_socket.send(control_message)
+        status = self.control_socket.recv()
+
     def get_governor_data(self, governor, uc):
         print(governor)
         print("uc = " + str(uc))

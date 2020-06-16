@@ -36,6 +36,24 @@ class controller_class():
         else:
             return b"Error"
 
+    def set_sampling_rate(self, args):
+        out = run(['cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor'],
+                                                    shell=True, stdout=PIPE)
+        governor = out.stdout.decode('utf-8').rstrip()
+        if governor == "adaptive" or governor == "ondemand":
+            out = run(["echo " + str(args) +
+                " > /sys/devices/system/cpu/cpufreq/" + governor +
+                "/sampling_rate"],
+                shell=True, stdout=PIPE)
+            if out.returncode is 0:
+                return b"Success"
+            else:
+                return b"Error"
+        else:
+            ret = ("Parameter sampling_rate is not available for " +
+                                                    governor + " governor")
+            return ret.encode('utf-8')
+
     def reset_tlm(self, args):
         out = run(['sudo ~/work/telemetry/./tlm'], shell=True,
                                                     stdout=PIPE, stderr=PIPE)
