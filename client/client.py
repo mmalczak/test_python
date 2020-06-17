@@ -171,7 +171,7 @@ class Client():
         ret = self.time_energy_stats()
         return ret
 
-    def governors_compare(self):
+    def governors_compare(self, params_names_list):
         print("Problem length modulation scale = " + str(self.prob_l_mod_scale))
         print("Number of tasks = " + str(self.num_tasks))
         ## warmup ##
@@ -207,9 +207,11 @@ class Client():
 #        plt.show()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
-        plt.savefig('/home/milosz/work/test_python/plots/' +
-                'num_tasks_' + str(self.num_tasks) +
-                ' plm_scale_' + str(self.prob_l_mod_scale) + '.png')
+        path = '/home/milosz/work/test_python/plots/'
+        for params_name in params_names_list:
+            path = path + params_name + '_' + str(getattr(self, params_name))
+        path = path + '.png'
+        plt.savefig(path)
 
     def sampling_rate_compare(self, governor, uc):
         print("Problem length modulation scale = " + str(self.prob_l_mod_scale))
@@ -246,6 +248,23 @@ class Client():
         plt.savefig('/home/milosz/work/test_python/plots/' +
                 'num_tasks_' + str(self.num_tasks) +
                 ' plm_scale_' + str(self.prob_l_mod_scale) + '.png')
+
+    def sweep_param(self, params, params_names_list):
+        if params_names_list is None:
+            params_names_list = [*params]
+            for params_name in params:
+                params_values = params[params_name]
+                setattr(self, params_name, params_values[0])
+        params_copy = params.copy()
+        params_name = next(iter(params_copy))
+        params_values = params_copy[params_name]
+        params_copy.pop(params_name)
+        for params_value in params_values:
+            setattr(self, params_name, params_value)
+            if len(params_copy) == 0:
+                self.governors_compare(params_names_list)
+            else:
+                self.sweep_param(params_copy, params_names_list)
 
     def sweep_num_tasks(self):
         num_tasks_list = [2, 4, 8]#, 16, 32, 64, 128, 256, 512, 1024]
