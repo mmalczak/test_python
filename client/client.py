@@ -20,8 +20,8 @@ def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
 
 class Client():
 
-    def __init__(self, task, num_tasks, dm_freq, plm_freq,
-                    dm_scale, plm_scale, num_measurements):
+    def __init__(self, task, num_tasks, dm_freq, plm_freq, dm_scale, plm_scale,
+                    num_measurements, increasing_freq):
         self.task = task
         self.num_tasks = num_tasks
         self.dm_freq = dm_freq
@@ -29,6 +29,7 @@ class Client():
         self.dm_scale = dm_scale
         self.plm_scale = plm_scale
         self.num_measurements = num_measurements
+        self.increasing_freq = increasing_freq
 
         self.context = zmq.Context()
         self.num_conn = 4
@@ -49,14 +50,20 @@ class Client():
         if self.dm_freq == 0:
             self.dm_sig = [self.dm_scale] * self.num_tasks
         else:
-            phase = 2 * np.pi * self.dm_freq * t + np.pi / 2
+            if self.increasing_freq:
+                phase = 2 * np.pi * self.dm_freq * t * t + np.pi / 2
+            else:
+                phase = 2 * np.pi * self.dm_freq * t + np.pi / 2
             self.dm_sig = (np.sin(phase) + 1) / 2 * self.dm_scale
 
         #problem length modulation
         if self.plm_freq == 0:
             self.plm_sig = [512 * self.plm_scale] * self.num_tasks
         else:
-            phase = 2 * np.pi * self.plm_freq * t - np.pi / 2
+            if self.increasing_freq:
+                phase = 2 * np.pi * self.plm_freq * t * t - np.pi / 2
+            else:
+                phase = 2 * np.pi * self.plm_freq * t - np.pi / 2
             self.plm_sig = (np.sin(phase) + 1) / 2 * 512 * self.plm_scale
 
         if modulation_plots:
@@ -285,12 +292,13 @@ dm_scale = 8 / 50
 plm_scale = 1
 num_measurements = 1
 sampling_rate = 10000
+increasing_freq = False
 
-client = Client(task, num_tasks, dm_freq, plm_freq,
-                dm_scale, plm_scale, num_measurements)
+client = Client(task, num_tasks, dm_freq, plm_freq, dm_scale, plm_scale,
+                num_measurements, increasing_freq)
 
 #client.sweep_prob_l_and_num_tasks()
-#client.time_energy_measurement(True)
-client.sweep_param({'num_tasks':[32], 'dm_freq':[2, 3], 'plm_scale': [1, 2]}, None)
+client.time_energy_measurement(True)
+#client.sweep_param({'num_tasks':[32], 'dm_freq':[2, 3], 'plm_scale': [1, 2]}, None)
 #client.sweep_param({'num_tasks':[1, 2], 'dm_freq':[1, 2, 3]}, None)
 
