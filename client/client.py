@@ -267,18 +267,6 @@ class Client():
             else:
                 self.sweep_param(params_copy, params_names_list)
 
-    def sweep_num_tasks(self):
-        num_tasks_list = [2, 4, 8]#, 16, 32, 64, 128, 256, 512, 1024]
-        for num_tasks in num_tasks_list:
-            self.num_tasks = num_tasks
-            self.governors_compare()
-
-    def sweep_prob_l_and_num_tasks(self):
-        prob_l_mod_scale_list = [1, 2, 4]#, 8, 16, 32, 64, 128, 256, 512, 1024]
-        for prob_l_mod_scale in prob_l_mod_scale_list:
-            self.prob_l_mod_scale = prob_l_mod_scale
-            self.sweep_num_tasks()
-
 
 # Available tasks with example arguments
 # "fft" [1]+[0]*31
