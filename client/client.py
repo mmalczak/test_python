@@ -7,6 +7,9 @@ import seaborn as sns
 from confidence_ellipse import confidence_ellipse
 from plot_kernel_data import plot_kernel_data
 
+# plm - problem length modulation
+# dm - delay modulation
+
 def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
     plt.scatter(data['energy_list'], data['time_list'], color=color,
                 marker=marker, label=label)
@@ -17,14 +20,14 @@ def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
 
 class Client():
 
-    def __init__(self, task, num_tasks, delay_mod_freq, prob_l_mod_freq,
-                    delay_mod_scale, prob_l_mod_scale, num_measurements):
+    def __init__(self, task, num_tasks, dm_freq, plm_freq,
+                    dm_scale, plm_scale, num_measurements):
         self.task = task
         self.num_tasks = num_tasks
-        self.delay_mod_freq = delay_mod_freq
-        self.prob_l_mod_freq = prob_l_mod_freq
-        self.delay_mod_scale = delay_mod_scale
-        self.prob_l_mod_scale = prob_l_mod_scale
+        self.dm_freq = dm_freq
+        self.plm_freq = plm_freq
+        self.dm_scale = dm_scale
+        self.plm_scale = plm_scale
         self.num_measurements = num_measurements
 
         self.context = zmq.Context()
@@ -43,18 +46,18 @@ class Client():
         t = np.array(range(0, self.num_tasks))/self.num_tasks
 
         #delay modulation
-        if self.delay_mod_freq == 0:
-            self.dm_sig_sin = [self.delay_mod_scale] * self.num_tasks
+        if self.dm_freq == 0:
+            self.dm_sig_sin = [self.dm_scale] * self.num_tasks
         else:
-            phase = 2 * np.pi * self.delay_mod_freq * t + np.pi / 2
-            self.dm_sig_sin = (np.sin(phase) + 1) / 2 * self.delay_mod_scale
+            phase = 2 * np.pi * self.dm_freq * t + np.pi / 2
+            self.dm_sig_sin = (np.sin(phase) + 1) / 2 * self.dm_scale
 
         #problem length modulation
-        if self.prob_l_mod_freq == 0:
-            self.plm_sig_sin = [512 * self.prob_l_mod_scale] * self.num_tasks
+        if self.plm_freq == 0:
+            self.plm_sig_sin = [512 * self.plm_scale] * self.num_tasks
         else:
-            phase = 2 * np.pi * self.prob_l_mod_freq * t - np.pi / 2
-            self.plm_sig_sin = (np.sin(phase) + 1) / 2 * 512 * self.prob_l_mod_scale
+            phase = 2 * np.pi * self.plm_freq * t - np.pi / 2
+            self.plm_sig_sin = (np.sin(phase) + 1) / 2 * 512 * self.plm_scale
 
         if modulation_plots:
             #plt.ion()
@@ -172,7 +175,7 @@ class Client():
         return ret
 
     def governors_compare(self, params_names_list):
-        print("Problem length modulation scale = " + str(self.prob_l_mod_scale))
+        print("Problem length modulation scale = " + str(self.plm_scale))
         print("Number of tasks = " + str(self.num_tasks))
         ## warmup ##
         self.set_scaling_governor('ondemand')
@@ -215,7 +218,7 @@ class Client():
         plt.savefig(path)
 
     def sampling_rate_compare(self, governor, uc):
-        print("Problem length modulation scale = " + str(self.prob_l_mod_scale))
+        print("Problem length modulation scale = " + str(self.plm_scale))
         print("Number of tasks = " + str(self.num_tasks))
         ## warmup ##
         self.set_scaling_governor('ondemand')
@@ -248,7 +251,7 @@ class Client():
         figure.set_size_inches(16, 12)
         plt.savefig('/home/milosz/work/test_python/plots/' +
                 'num_tasks_' + str(self.num_tasks) +
-                ' plm_scale_' + str(self.prob_l_mod_scale) + '.png')
+                ' plm_scale_' + str(self.plm_scale) + '.png')
 
     def sweep_param(self, params, params_names_list):
         if params_names_list is None:
@@ -275,16 +278,19 @@ class Client():
 # "receive_array" [1, 2, 3, 4, 5]
 
 task = "fft"
-num_tasks = 6
-delay_mod_freq = 6
-prob_l_mod_freq = 3
-delay_mod_scale = 1 / 5
-prob_l_mod_scale = 1
-num_measurements = 5
-client = Client(task, num_tasks, delay_mod_freq, prob_l_mod_freq,
-                delay_mod_scale, prob_l_mod_scale, num_measurements)
-prob_l_mod_scale_list = [1, 2, 4]#, 8, 16, 32, 64, 128, 256, 512, 1024]
-for prob_l_mod_scale in prob_l_mod_scale_list:
-    client.prob_l_mod_scale = prob_l_mod_scale
-    client.sweep_num_tasks()
+num_tasks = 128
+dm_freq = 3
+plm_freq = 0
+dm_scale = 8 / 50
+plm_scale = 1
+num_measurements = 1
+sampling_rate = 10000
+
+client = Client(task, num_tasks, dm_freq, plm_freq,
+                dm_scale, plm_scale, num_measurements)
+
+#client.sweep_prob_l_and_num_tasks()
+#client.time_energy_measurement(True)
+client.sweep_param({'num_tasks':[32], 'dm_freq':[2, 3], 'plm_scale': [1, 2]}, None)
+#client.sweep_param({'num_tasks':[1, 2], 'dm_freq':[1, 2, 3]}, None)
 
