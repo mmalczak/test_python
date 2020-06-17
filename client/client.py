@@ -47,26 +47,26 @@ class Client():
 
         #delay modulation
         if self.dm_freq == 0:
-            self.dm_sig_sin = [self.dm_scale] * self.num_tasks
+            self.dm_sig = [self.dm_scale] * self.num_tasks
         else:
             phase = 2 * np.pi * self.dm_freq * t + np.pi / 2
-            self.dm_sig_sin = (np.sin(phase) + 1) / 2 * self.dm_scale
+            self.dm_sig = (np.sin(phase) + 1) / 2 * self.dm_scale
 
         #problem length modulation
         if self.plm_freq == 0:
-            self.plm_sig_sin = [512 * self.plm_scale] * self.num_tasks
+            self.plm_sig = [512 * self.plm_scale] * self.num_tasks
         else:
             phase = 2 * np.pi * self.plm_freq * t - np.pi / 2
-            self.plm_sig_sin = (np.sin(phase) + 1) / 2 * 512 * self.plm_scale
+            self.plm_sig = (np.sin(phase) + 1) / 2 * 512 * self.plm_scale
 
         if modulation_plots:
             #plt.ion()
             #plt.show()
             plt.subplot(2, 1, 1, title="Delay modulation signal")
-            plt.plot(self.dm_sig_sin)
+            plt.plot(self.dm_sig)
             #plt.pause(0.1)
             plt.subplot(2, 1, 2, title="Problem length modulation signal")
-            plt.plot(self.plm_sig_sin)
+            plt.plot(self.plm_sig)
             #plt.pause(0.1)
             #plt.show()
             figure = plt.gcf()
@@ -77,7 +77,7 @@ class Client():
     def stress_server(self):
         time_diff=0
         for j in range(0, self.num_tasks):
-            args = [1]+[0]*int(self.plm_sig_sin[j])
+            args = [1]+[0]*int(self.plm_sig[j])
             message = pickle.dumps({'task':self.task, 'args':args})
             start = time.time()
             for i in range(0, self.num_conn):
@@ -86,7 +86,7 @@ class Client():
                 data = self.sockets[i].recv()
 
             time_diff = time.time() - start
-            sleep_time = self.dm_sig_sin[j] - time_diff
+            sleep_time = self.dm_sig[j] - time_diff
             if sleep_time > 0:
                 time.sleep(sleep_time)
 
