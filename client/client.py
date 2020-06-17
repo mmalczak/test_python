@@ -58,13 +58,13 @@ class Client():
 
         #problem length modulation
         if self.plm_freq == 0:
-            self.plm_sig = [512 * self.plm_scale] * self.num_tasks
+            self.plm_sig = [self.plm_scale] * self.num_tasks
         else:
             if self.increasing_freq:
                 phase = 2 * np.pi * self.plm_freq * t * t - np.pi / 2
             else:
                 phase = 2 * np.pi * self.plm_freq * t - np.pi / 2
-            self.plm_sig = (np.sin(phase) + 1) / 2 * 512 * self.plm_scale
+            self.plm_sig = (np.sin(phase) + 1) / 2 * self.plm_scale
 
         if modulation_plots:
             #plt.ion()
@@ -289,7 +289,7 @@ num_tasks = 128
 dm_freq = 3
 plm_freq = 0
 dm_scale = 8 / 50
-plm_scale = 1
+plm_scale = 512
 num_measurements = 1
 sampling_rate = 10000
 increasing_freq = False
