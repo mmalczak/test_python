@@ -21,7 +21,7 @@ def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
 class Client():
 
     def __init__(self, task, num_tasks, dm_freq, plm_freq, dm_scale, plm_scale,
-                    num_measurements, increasing_freq):
+                    num_measurements, increasing_freq, square):
         self.task = task
         self.num_tasks = num_tasks
         self.dm_freq = dm_freq
@@ -30,6 +30,7 @@ class Client():
         self.plm_scale = plm_scale
         self.num_measurements = num_measurements
         self.increasing_freq = increasing_freq
+        self.square = square
 
         self.context = zmq.Context()
         self.num_conn = 4
@@ -55,6 +56,9 @@ class Client():
             else:
                 phase = 2 * np.pi * self.dm_freq * t + np.pi / 2
             self.dm_sig = (np.sin(phase) + 1) / 2 * self.dm_scale
+        if self.square:
+            self.dm_sig = [self.dm_scale if i > self.dm_scale / 2 else 0
+                                                        for i in self.dm_sig]
 
         #problem length modulation
         if self.plm_freq == 0:
@@ -65,6 +69,9 @@ class Client():
             else:
                 phase = 2 * np.pi * self.plm_freq * t - np.pi / 2
             self.plm_sig = (np.sin(phase) + 1) / 2 * self.plm_scale
+        if self.square:
+            self.plm_sig = [self.plm_scale if i > self.plm_scale / 2 else 0
+                                                        for i in self.plm_sig]
 
         if modulation_plots:
             #plt.ion()
@@ -293,9 +300,10 @@ plm_scale = 512
 num_measurements = 1
 sampling_rate = 10000
 increasing_freq = False
+square = False
 
 client = Client(task, num_tasks, dm_freq, plm_freq, dm_scale, plm_scale,
-                num_measurements, increasing_freq)
+                num_measurements, increasing_freq, square)
 
 #client.sweep_prob_l_and_num_tasks()
 client.time_energy_measurement(True)
