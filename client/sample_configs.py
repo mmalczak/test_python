@@ -50,3 +50,16 @@
 #plm_scale = 1
 #num_measurements = 1
 
+
+task = "fft"
+num_tasks = 128
+dm_freq = 32
+plm_freq = 0
+dm_scale = 12 / 50
+plm_scale = 512*90
+num_measurements = 1
+sampling_rate = 10000
+increasing_freq = False
+square = True
+
+
