@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from confidence_ellipse import confidence_ellipse
 from plot_kernel_data import plot_kernel_data
+import sys
+
 
 # plm - problem length modulation
 # dm - delay modulation
@@ -17,6 +19,8 @@ def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
                 n_std=1, edgecolor=color)
     plt.xlabel('energy')
     plt.ylabel('time')
+
+project_location = sys.argv[2]
 
 class Client():
 
@@ -39,10 +43,12 @@ class Client():
         for i in range(0, self.num_conn):
             port = 5550 + i
             self.sockets.append(self.context.socket(zmq.DEALER))
-            self.sockets[i].connect("tcp://127.0.0.1:"+str(port))
+            ip = sys.argv[1]
+            self.sockets[i].connect("tcp://" + ip + ":"+str(port))
 
         self.control_socket = self.context.socket(zmq.DEALER)
-        self.control_socket.connect("tcp://127.0.0.1:"+str(5540))
+        ip = sys.argv[1]
+        self.control_socket.connect("tcp://" + ip + ":"+str(5540))
 
     def init_arrays(self, modulation_plots):
         t = np.array(range(0, self.num_tasks))/self.num_tasks
@@ -85,7 +91,7 @@ class Client():
             #plt.show()
             figure = plt.gcf()
             figure.set_size_inches(16, 12)
-            plt.savefig('/home/milosz/work/test_python/plots/mod_vs_tlm/' +
+            plt.savefig(project_location + 'test_python/plots/mod_vs_tlm/' +
                                                     'modulation_signals.png')
 
     def stress_server(self):
@@ -146,7 +152,7 @@ class Client():
                                             'args':None})
             self.control_socket.send(control_message)
             data = self.control_socket.recv()
-            plot_kernel_data(data)
+            plot_kernel_data(data, project_location)
         ### telemetry read ###
 
         return {'energy':energy, 'time':total_time}
@@ -225,7 +231,7 @@ class Client():
 #        plt.show()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
-        path = '/home/milosz/work/test_python/plots/'
+        path = project_location + 'test_python/plots/'
         for params_name in params_names_list:
             path = path + params_name + '_' + str(getattr(self, params_name))
         path = path + '.png'
@@ -263,7 +269,7 @@ class Client():
 #        plt.show()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
-        plt.savefig('/home/milosz/work/test_python/plots/' +
+        plt.savefig(project_location + 'test_python/plots/' +
                 'num_tasks_' + str(self.num_tasks) +
                 ' plm_scale_' + str(self.plm_scale) + '.png')
 

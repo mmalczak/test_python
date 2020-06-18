@@ -2,7 +2,7 @@ import zmq
 from multiprocessing import Process
 import pickle
 import numpy as np
-
+import sys
 
 class worker_class():
 
@@ -29,7 +29,8 @@ def socket_process(process_num):
     context = zmq.Context()
     socket = context.socket(zmq.ROUTER)
     port = 5550 + process_num
-    socket.bind("tcp://127.0.0.1:"+str(port))
+    ip = sys.argv[1]
+    socket.bind("tcp://" + ip + ":"+str(port))
     while True:
         [identity, message] = socket.recv_multipart()
         message = pickle.loads(message)

@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 from subprocess import run
 from subprocess import PIPE
+import sys
 
 class controller_class():
 
@@ -71,7 +72,8 @@ class controller_class():
 context = zmq.Context()
 socket = context.socket(zmq.ROUTER)
 port = 5540
-socket.bind("tcp://127.0.0.1:"+str(port))
+ip = sys.argv[1]
+socket.bind("tcp://" + ip + ":"+str(port))
 while True:
     [identity, message] = socket.recv_multipart()
     message = pickle.loads(message)
