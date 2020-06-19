@@ -50,6 +50,19 @@ class Client():
         ip = sys.argv[1]
         self.control_socket.connect("tcp://" + ip + ":"+str(5540))
 
+    def __str__(self):
+        string = ""
+        string = string + "task_" + self.task
+        string = string + ", num_tasks_" + str(self.num_tasks)
+        string = string + ", dm_freq_" + str(self.dm_freq)
+        string = string + ", plm_freq_" + str(self.plm_freq)
+        string = string + ", dm_scale_" + str(self.dm_scale)
+        string = string + ", plm_scale_" + str(self.plm_scale)
+        string = string + ", num_measurements_" + str(self.num_measurements)
+        string = string + ", increasing_freq_" + str(self.increasing_freq)
+        string = string + ", square_" + str(self.square)
+        return string
+
     def init_arrays(self, modulation_plots):
         t = np.array(range(0, self.num_tasks))/self.num_tasks
 
@@ -241,15 +254,7 @@ class Client():
         figure.set_size_inches(16, 12)
         path = project_location + 'test_python/plots/'
 
-        path = path + "task_" + self.task
-        path = path + ", num_tasks_" + str(self.num_tasks)
-        path = path + ", dm_freq_" + str(self.dm_freq)
-        path = path + ", plm_freq_" + str(self.plm_freq)
-        path = path + ", dm_scale_" + str(self.dm_scale)
-        path = path + ", plm_scale_" + str(self.plm_scale)
-        path = path + ", num_measurements_" + str(self.num_measurements)
-        path = path + ", increasing_freq_" + str(self.increasing_freq)
-        path = path + ", square_" + str(self.square)
+        path = path + str(self)
 
         #for params_name in params_names_list:
         #    path = path + params_name + '_' + str(getattr(self, params_name))
