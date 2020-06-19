@@ -207,7 +207,7 @@ class Client():
         ret = self.time_energy_stats()
         return ret
 
-    def governors_compare(self, params_names_list):
+    def governors_compare(self):
         print("Problem length modulation scale = " + str(self.plm_scale))
         print("Number of tasks = " + str(self.num_tasks))
         self.set_scaling_governor('adaptive')
@@ -260,8 +260,6 @@ class Client():
 
         path = path + str(self)
 
-        #for params_name in params_names_list:
-        #    path = path + params_name + '_' + str(getattr(self, params_name))
         path = path + '.png'
         plt.savefig(path)
 
@@ -314,7 +312,7 @@ class Client():
         for params_value in params_values:
             setattr(self, params_name, params_value)
             if len(params_copy) == 0:
-                self.governors_compare(params_names_list)
+                self.governors_compare()
             else:
                 self.sweep_param(params_copy, params_names_list)
 
