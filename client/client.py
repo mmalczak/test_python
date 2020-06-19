@@ -105,7 +105,7 @@ class Client():
             figure = plt.gcf()
             figure.set_size_inches(16, 12)
             plt.savefig(project_location + 'test_python/plots/mod_vs_tlm/' +
-                                                    'modulation_signals.png')
+                                str(self) + ', modulation_signals.png')
 
     def stress_server(self):
         time_diff=0
@@ -165,7 +165,7 @@ class Client():
                                             'args':None})
             self.control_socket.send(control_message)
             data = self.control_socket.recv()
-            plot_kernel_data(data, project_location)
+            plot_kernel_data(data, project_location, str(self))
         ### telemetry read ###
 
         return {'energy':energy, 'time':total_time}
@@ -210,12 +210,16 @@ class Client():
     def governors_compare(self, params_names_list):
         print("Problem length modulation scale = " + str(self.plm_scale))
         print("Number of tasks = " + str(self.num_tasks))
+        self.set_scaling_governor('adaptive')
+        self.set_uc(60)
+        self.time_energy_measurement(True)
         ## warmup ##
         self.set_scaling_governor('ondemand')
         self.time_energy_stats()
         ## warmup ##
 
         sns.set()
+        plt.figure(1)
         fig, ax_kwargs = plt.subplots()
 
         data_gov = self.get_governor_data('performance', 'NA')
@@ -252,7 +256,7 @@ class Client():
 #        plt.show()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
-        path = project_location + 'test_python/plots/'
+        path = project_location + 'test_python/plots/scatter/'
 
         path = path + str(self)
 

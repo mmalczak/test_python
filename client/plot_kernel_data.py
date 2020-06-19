@@ -13,7 +13,7 @@ def get_array(x):
     x = [float(el) for el in x]
     return x
 
-def plot_kernel_data(data, project_location):
+def plot_kernel_data(data, project_location, params_str):
     data = data.decode('utf-8')
     x_beg = 00;
     x_end = 100;
@@ -155,4 +155,4 @@ def plot_kernel_data(data, project_location):
     figure = plt.gcf()
     figure.set_size_inches(16, 12)
     plt.savefig(project_location + '/test_python/plots/mod_vs_tlm/' +
-                                                'tlm_data.png')
+                                    params_str + ', tlm_data.png')
