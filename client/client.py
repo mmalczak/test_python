@@ -212,19 +212,27 @@ class Client():
         data_gov = self.get_governor_data('ondemand', 'NA')
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0, 0, 0), 's', 'ondemand')
         data_gov = self.get_governor_data('adaptive', 0)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'b', 'x', 'adaptive, uc = 0')
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'darkblue', 'x', 'adaptive, uc = 0')
+        data_gov = self.get_governor_data('adaptive', 10)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'brown', 'x', 'adaptive, uc = 10')
         data_gov = self.get_governor_data('adaptive', 20)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'g', 'x', 'adaptive, uc = 20')
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'peru', 'x', 'adaptive, uc = 20')
+        data_gov = self.get_governor_data('adaptive', 30)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'gold', 'x', 'adaptive, uc = 30')
         data_gov = self.get_governor_data('adaptive', 40)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'g', 'x', 'adaptive, uc = 40')
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'lime', 'x', 'adaptive, uc = 40')
         data_gov = self.get_governor_data('adaptive', 50)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'r', 'x', 'adaptive, uc = 50')
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'aqua', 'x', 'adaptive, uc = 50')
         data_gov = self.get_governor_data('adaptive', 60)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'c', 'x', 'adaptive, uc = 60')
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'dodgerblue', 'x', 'adaptive, uc = 60')
+        data_gov = self.get_governor_data('adaptive', 70)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'yellow', 'x', 'adaptive, uc = 70')
         data_gov = self.get_governor_data('adaptive', 80)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'm', 'x', 'adaptive, uc = 80')
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'darkviolet', 'x', 'adaptive, uc = 80')
+        data_gov = self.get_governor_data('adaptive', 90)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'pink', 'x', 'adaptive, uc = 90')
         data_gov = self.get_governor_data('adaptive', 100)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'y', 'x', 'adaptive, uc = 100')
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'crimson', 'x', 'adaptive, uc = 100')
 
         plt.legend()
 
@@ -232,8 +240,19 @@ class Client():
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
         path = project_location + 'test_python/plots/'
-        for params_name in params_names_list:
-            path = path + params_name + '_' + str(getattr(self, params_name))
+
+        path = path + "task_" + self.task
+        path = path + ", num_tasks_" + str(self.num_tasks)
+        path = path + ", dm_freq_" + str(self.dm_freq)
+        path = path + ", plm_freq_" + str(self.plm_freq)
+        path = path + ", dm_scale_" + str(self.dm_scale)
+        path = path + ", plm_scale_" + str(self.plm_scale)
+        path = path + ", num_measurements_" + str(self.num_measurements)
+        path = path + ", increasing_freq_" + str(self.increasing_freq)
+        path = path + ", square_" + str(self.square)
+
+        #for params_name in params_names_list:
+        #    path = path + params_name + '_' + str(getattr(self, params_name))
         path = path + '.png'
         plt.savefig(path)
 
