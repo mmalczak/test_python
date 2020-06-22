@@ -158,6 +158,8 @@ class Client():
         self.control_socket.send(control_message)
         energy = self.control_socket.recv()
         energy = float(energy)
+        if energy < 0:
+            return -1
         ### Energy measurement stop ###
 
         ### telemetry read ###
@@ -177,6 +179,8 @@ class Client():
         for i in range(self.num_measurements):
             print("sample idx = " + str(i))
             ret = self.time_energy_measurement(False)
+            if ret == -1:
+                continue
             energy_list.append(ret['energy'])
             time_list.append(ret['time'])
 
