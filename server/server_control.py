@@ -28,6 +28,15 @@ class controller_class():
         else:
             return b"Error"
 
+    def set_adaptive_param(self, args):
+            out = run(["echo " + str(args[1]) +
+                " > /sys/devices/system/cpu/cpufreq/adaptive/" + str(args[0])],
+                shell=True)
+            if out.returncode is 0:
+                return b"Success"
+            else:
+                return b"Error"
+
     def set_uc(self, args):
         out = run(["echo " + str(args) +
             " > /sys/devices/system/cpu/cpufreq/adaptive/uc"],

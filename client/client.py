@@ -188,6 +188,11 @@ class Client():
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
 
+    def set_adaptive_param(self, param_name, value):
+        control_message = pickle.dumps({'task':'set_adaptive_param', 'args':[param_name, value]})
+        self.control_socket.send(control_message)
+        status = self.control_socket.recv()
+
     def set_uc(self, uc):
         control_message = pickle.dumps({'task':'set_uc', 'args':uc})
         self.control_socket.send(control_message)
