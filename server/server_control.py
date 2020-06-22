@@ -65,7 +65,7 @@ class controller_class():
             return ret.encode('utf-8')
 
     def reset_tlm(self, args):
-        out = run(['sudo ~/work/telemetry/./tlm'], shell=True,
+        out = run(['sudo ../..//telemetry/./tlm'], shell=True,
                                                     stdout=PIPE, stderr=PIPE)
         if out.returncode is 0:
             return b"Success"
@@ -73,7 +73,7 @@ class controller_class():
             return b"Error"
 
     def read_tlm(self, args):
-        out = run(['sudo ~/work/telemetry/./tlm -f csv'], shell=True,
+        out = run(['sudo ../../telemetry/./tlm -f csv'], shell=True,
                                                     stdout=PIPE, stderr=PIPE)
         tlm_data = out.stdout
         return tlm_data
