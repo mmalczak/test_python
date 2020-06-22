@@ -8,20 +8,21 @@ class worker_class():
 
     def fft(self, data):
         data = np.fft.fft(data)
-        print("fft")
-        print(data)
+        #print("fft")
+        #print(data)
 
     def empty_loop(self, length):
         for i in range(0, length):
             pass
-        print("empty_loop")
+        #print("empty_loop")
 
     def random_gen(self, length):
         r = np.random.rand(length)
-        print(r)
+        #print(r)
 
     def receive_array(self, array):
-        print(array)
+        pass
+        #print(array)
 
 
 
