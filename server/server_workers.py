@@ -39,7 +39,7 @@ def socket_process(process_num):
         socket.send_multipart([identity, b"Success"])
 
 
-num_cores = 4
+num_cores = 8
 processes = []
 for i in range(0, num_cores):
     processes.append(Process(target=socket_process, args=(i,)))

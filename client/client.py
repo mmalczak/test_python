@@ -37,7 +37,7 @@ class Client():
         self.square = square
 
         self.context = zmq.Context()
-        self.num_conn = 4
+        self.num_conn = 8
         self.sockets = []
 
         for i in range(0, self.num_conn):
