@@ -52,15 +52,15 @@ class Client():
 
     def __str__(self):
         string = ""
-        string = string + "task_" + self.task
-        string = string + ", num_tasks_" + str(self.num_tasks)
-        string = string + ", dm_freq_" + str(self.dm_freq)
-        string = string + ", plm_freq_" + str(self.plm_freq)
-        string = string + ", dm_scale_" + str(self.dm_scale)
-        string = string + ", plm_scale_" + str(self.plm_scale)
-        string = string + ", num_measurements_" + str(self.num_measurements)
-        string = string + ", increasing_freq_" + str(self.increasing_freq)
-        string = string + ", square_" + str(self.square)
+        string = string + "task_{}".format(self.task)
+        string = string + ",num_tasks_{}".format(self.num_tasks)
+        string = string + ",dm_freq_{}".format(self.dm_freq)
+        string = string + ",plm_freq_{}".format(self.plm_freq)
+        string = string + ",dm_scale_{:.3f}".format(self.dm_scale)
+        string = string + ",plm_scale_{}".format(self.plm_scale).zfill(8)
+        string = string + ",num_measurements_{}".format(self.num_measurements)
+        string = string + ",increasing_freq_{}".format(self.increasing_freq)
+        string = string + ",square_{}".format(self.square)
         return string
 
     def init_arrays(self, modulation_plots):
