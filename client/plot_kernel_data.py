@@ -156,3 +156,4 @@ def plot_kernel_data(data, project_location, params_str):
     figure.set_size_inches(16, 12)
     plt.savefig(project_location + '/test_python/plots/mod_vs_tlm/' +
                                     params_str + ', tlm_data.png')
+    plt.close()

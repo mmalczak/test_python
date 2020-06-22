@@ -106,6 +106,7 @@ class Client():
             figure.set_size_inches(16, 12)
             plt.savefig(project_location + 'test_python/plots/mod_vs_tlm/' +
                                 str(self) + ', modulation_signals.png')
+            plt.close()
 
     def stress_server(self):
         time_diff=0
@@ -262,6 +263,7 @@ class Client():
 
         path = path + '.png'
         plt.savefig(path)
+        plt.close()
 
     def sampling_rate_compare(self, governor, uc):
         print("Problem length modulation scale = " + str(self.plm_scale))
