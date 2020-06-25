@@ -300,15 +300,26 @@ class Client():
         self.set_sampling_rate(160000)
         data_gov = self.get_governor_data(governor, uc)
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'm', 'x', 'sampling_rate = 160000')
+        self.set_sampling_rate(320000)
+        data_gov = self.get_governor_data(governor, uc)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'lime', 'x', 'sampling_rate = 320000')
+        self.set_sampling_rate(640000)
+        data_gov = self.get_governor_data(governor, uc)
+        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'pink', 'x', 'sampling_rate = 640000')
+
 
         plt.legend()
 
 #        plt.show()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
-        plt.savefig(project_location + 'test_python/plots/' +
-                'num_tasks_' + str(self.num_tasks) +
-                ' plm_scale_' + str(self.plm_scale) + '.png')
+        path = project_location + 'test_python/plots/sampling_rate/'
+        path = path + str(self)
+        path = path + ',' + governor
+        path = path + ',' + str(uc)
+        path = path + '.png'
+        plt.savefig(path)
+        plt.close()
 
     def sweep_param(self, params, params_names_list):
         if params_names_list is None:
