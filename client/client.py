@@ -321,6 +321,64 @@ class Client():
         plt.savefig(path)
         plt.close()
 
+    def append_mean_data(self, governor, uc, energy_list, time_list):
+        data_gov = self.get_governor_data(governor, uc)
+        energy = np.mean(data_gov['energy_list'])
+        time = np.mean(data_gov['time_list'])
+        energy_list.append(energy)
+        time_list.append(time)
+
+    def sampling_rate_line(self, governor, uc, sampling_rate_values):
+        energy_list = []
+        time_list = []
+
+        for sampling_rate in sampling_rate_values:
+            self.set_sampling_rate(sampling_rate)
+            self.append_mean_data(governor, uc, energy_list, time_list)
+        return {'energy_list':energy_list, 'time_list':time_list}
+
+    def sampling_rate_plot_line(self, governor, uc, color, marker,
+                                ax_kwargs, sampling_rate_values):
+        data_gov = self.sampling_rate_line(governor, uc, sampling_rate_values)
+        plt.plot(data_gov['energy_list'], data_gov['time_list'],
+                    color=color, marker=marker, label=governor + ", uc=" + str(uc))
+        for i, txt in enumerate(sampling_rate_values):
+            ax_kwargs.annotate(txt, (data_gov['energy_list'][i], data_gov['time_list'][i]))
+
+    def governors_compare_sampling_rate(self, sampling_rate_values):
+        ## warmup ##
+        self.set_scaling_governor('ondemand')
+        self.time_energy_stats()
+        ## warmup ##
+
+        sns.set()
+        plt.figure(1)
+        fig, ax_kwargs = plt.subplots()
+
+        self.sampling_rate_plot_line('ondemand', 'NA', (0, 0, 0), 's', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 0, 'darkblue', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 10, 'brown', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 20, 'peru', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 30, 'gold', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 40, 'lime', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 50, 'aqua', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 60, 'dodgerblue', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 70, 'yellow', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 80, 'darkviolet', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 90, 'pink', 'x', ax_kwargs, sampling_rate_values)
+        self.sampling_rate_plot_line('adaptive', 100, 'crimson', 'x', ax_kwargs, sampling_rate_values)
+
+        plt.xlabel('energy')
+        plt.ylabel('time')
+        plt.legend()
+        figure = plt.gcf()
+        figure.set_size_inches(16, 12)
+        path = project_location + 'test_python/plots/sampling_rate/'
+        path = path + str(self)
+        path = path + '.png'
+        plt.savefig(path)
+        plt.close()
+
     def sweep_param(self, params, params_names_list):
         if params_names_list is None:
             params_names_list = [*params]
