@@ -8,7 +8,6 @@ from confidence_ellipse import confidence_ellipse
 from plot_kernel_data import plot_kernel_data
 import sys
 
-
 # plm - problem length modulation
 # dm - delay modulation
 
@@ -93,15 +92,10 @@ class Client():
                                                         for i in self.plm_sig]
 
         if modulation_plots:
-            #plt.ion()
-            #plt.show()
             plt.subplot(2, 1, 1, title="Delay modulation signal")
             plt.plot(self.dm_sig)
-            #plt.pause(0.1)
             plt.subplot(2, 1, 2, title="Problem length modulation signal")
             plt.plot(self.plm_sig)
-            #plt.pause(0.1)
-            #plt.show()
             figure = plt.gcf()
             figure.set_size_inches(16, 12)
             plt.savefig(project_location + 'test_python/plots/mod_vs_tlm/' +
@@ -193,7 +187,8 @@ class Client():
         status = self.control_socket.recv()
 
     def set_adaptive_param(self, param_name, value):
-        control_message = pickle.dumps({'task':'set_adaptive_param', 'args':[param_name, value]})
+        control_message = pickle.dumps({'task':'set_adaptive_param',
+                                        'args':[param_name, value]})
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
 
@@ -204,7 +199,7 @@ class Client():
 
     def set_sampling_rate(self, sampling_rate):
         control_message = pickle.dumps({'task':'set_sampling_rate',
-                                                        'args':sampling_rate})
+                                        'args':sampling_rate})
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
 
@@ -262,21 +257,15 @@ class Client():
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'crimson', 'x', 'adaptive, uc = 100')
 
         plt.legend()
-
-#        plt.show()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
         path = project_location + 'test_python/plots/scatter/'
-
         path = path + str(self)
-
         path = path + '.png'
         plt.savefig(path)
         plt.close()
 
     def sampling_rate_compare(self, governor, uc):
-        print("Problem length modulation scale = " + str(self.plm_scale))
-        print("Number of tasks = " + str(self.num_tasks))
         ## warmup ##
         self.set_scaling_governor('ondemand')
         self.time_energy_stats()
@@ -307,10 +296,7 @@ class Client():
         data_gov = self.get_governor_data(governor, uc)
         scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'pink', 'x', 'sampling_rate = 640000')
 
-
         plt.legend()
-
-#        plt.show()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
         path = project_location + 'test_python/plots/sampling_rate/'
