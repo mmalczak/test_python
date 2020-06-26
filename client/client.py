@@ -11,6 +11,22 @@ import sys
 # plm - problem length modulation
 # dm - delay modulation
 
+passive_governors=[{'governor':'performance', 'uc':'NA', 'color':(0.7, 0.7, 0.7), 'marker':'o'},
+                   {'governor':'powersave', 'uc':'NA', 'color':(0.3, 0.3, 0.3), 'marker':'o'}]
+ondemand_governors=[{'governor':'ondemand', 'uc':'NA', 'color':(0, 0, 0), 'marker':'s'}]
+adaptive_governors=[{'governor':'adaptive', 'uc':0, 'color':'darkblue', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':10, 'color':'brown', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':20, 'color':'peru', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':30, 'color':'gold', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':40, 'color':'lime', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':50, 'color':'aqua', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':60, 'color':'dodgerblue', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':70, 'color':'yellow', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':80, 'color':'darkviolet', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':90, 'color':'pink', 'marker':'s'},
+                    {'governor':'adaptive', 'uc':100, 'color':'crimson', 'marker':'s'}]
+
+
 def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
     plt.scatter(data['energy_list'], data['time_list'], color=color,
                 marker=marker, label=label)
@@ -227,34 +243,16 @@ class Client():
         plt.figure(1)
         fig, ax_kwargs = plt.subplots()
 
-        data_gov = self.get_governor_data('performance', 'NA')
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0.7, 0.7, 0.7), 'o', 'performance')
-        data_gov = self.get_governor_data('powersave', 'NA')
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0.3, 0.3, 0.3), 'o', 'powersave')
-        data_gov = self.get_governor_data('ondemand', 'NA')
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, (0, 0, 0), 's', 'ondemand')
-        data_gov = self.get_governor_data('adaptive', 0)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'darkblue', 'x', 'adaptive, uc = 0')
-        data_gov = self.get_governor_data('adaptive', 10)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'brown', 'x', 'adaptive, uc = 10')
-        data_gov = self.get_governor_data('adaptive', 20)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'peru', 'x', 'adaptive, uc = 20')
-        data_gov = self.get_governor_data('adaptive', 30)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'gold', 'x', 'adaptive, uc = 30')
-        data_gov = self.get_governor_data('adaptive', 40)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'lime', 'x', 'adaptive, uc = 40')
-        data_gov = self.get_governor_data('adaptive', 50)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'aqua', 'x', 'adaptive, uc = 50')
-        data_gov = self.get_governor_data('adaptive', 60)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'dodgerblue', 'x', 'adaptive, uc = 60')
-        data_gov = self.get_governor_data('adaptive', 70)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'yellow', 'x', 'adaptive, uc = 70')
-        data_gov = self.get_governor_data('adaptive', 80)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'darkviolet', 'x', 'adaptive, uc = 80')
-        data_gov = self.get_governor_data('adaptive', 90)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'pink', 'x', 'adaptive, uc = 90')
-        data_gov = self.get_governor_data('adaptive', 100)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'crimson', 'x', 'adaptive, uc = 100')
+        for gov in passive_governors:
+            data_gov = self.get_governor_data(gov['governor'], gov['uc'])
+            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'], gov['marker'], gov['governor'])
+        for gov in ondemand_governors:
+            data_gov = self.get_governor_data(gov['governor'], gov['uc'])
+            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'], gov['marker'], gov['governor'])
+        for gov in adaptive_governors:
+            data_gov = self.get_governor_data(gov['governor'], gov['uc'])
+            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'], gov['marker'],
+                                            gov['governor'] + ', uc = ' + str(gov['uc']))
 
         plt.legend()
         figure = plt.gcf()
@@ -265,7 +263,7 @@ class Client():
         plt.savefig(path)
         plt.close()
 
-    def sampling_rate_compare(self, governor, uc):
+    def sampling_rate_compare(self, governor, uc, sampling_rate_values):
         ## warmup ##
         self.set_scaling_governor('ondemand')
         self.time_energy_stats()
@@ -273,28 +271,13 @@ class Client():
 
         sns.set()
         fig, ax_kwargs = plt.subplots()
+        colors = ['b', 'g', 'r', 'c', 'm', 'lime', 'pink', 'b', 'g', 'r', 'c', 'm']
 
-        self.set_sampling_rate(10000)
-        data_gov = self.get_governor_data(governor, uc)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'b', 'x', 'sampling_rate = 10000')
-        self.set_sampling_rate(20000)
-        data_gov = self.get_governor_data(governor, uc)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'g', 'x', 'sampling_rate = 20000')
-        self.set_sampling_rate(40000)
-        data_gov = self.get_governor_data(governor, uc)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'r', 'x', 'sampling_rate = 40000')
-        self.set_sampling_rate(80000)
-        data_gov = self.get_governor_data(governor, uc)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'c', 'x', 'sampling_rate = 80000')
-        self.set_sampling_rate(160000)
-        data_gov = self.get_governor_data(governor, uc)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'm', 'x', 'sampling_rate = 160000')
-        self.set_sampling_rate(320000)
-        data_gov = self.get_governor_data(governor, uc)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'lime', 'x', 'sampling_rate = 320000')
-        self.set_sampling_rate(640000)
-        data_gov = self.get_governor_data(governor, uc)
-        scatter_with_confidence_ellipse(data_gov, ax_kwargs, 'pink', 'x', 'sampling_rate = 640000')
+        for i, sampling_rate in enumerate(sampling_rate_values):
+            self.set_sampling_rate(sampling_rate)
+            data_gov = self.get_governor_data(governor, uc)
+            scatter_with_confidence_ellipse(data_gov, ax_kwargs, colors[i],
+                                            'x', 'sampling_rate = ' + str(sampling_rate))
 
         plt.legend()
         figure = plt.gcf()
@@ -341,18 +324,12 @@ class Client():
         plt.figure(1)
         fig, ax_kwargs = plt.subplots()
 
-        self.sampling_rate_plot_line('ondemand', 'NA', (0, 0, 0), 's', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 0, 'darkblue', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 10, 'brown', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 20, 'peru', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 30, 'gold', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 40, 'lime', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 50, 'aqua', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 60, 'dodgerblue', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 70, 'yellow', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 80, 'darkviolet', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 90, 'pink', 'x', ax_kwargs, sampling_rate_values)
-        self.sampling_rate_plot_line('adaptive', 100, 'crimson', 'x', ax_kwargs, sampling_rate_values)
+        for gov in ondemand_governors:
+            self.sampling_rate_plot_line(gov['governor'], gov['uc'], gov['color'], gov['marker'],
+                                         ax_kwargs, sampling_rate_values)
+        for gov in adaptive_governors:
+            self.sampling_rate_plot_line(gov['governor'], gov['uc'], gov['color'], gov['marker'],
+                                         ax_kwargs, sampling_rate_values)
 
         plt.xlabel('energy')
         plt.ylabel('time')
