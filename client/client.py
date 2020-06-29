@@ -265,7 +265,7 @@ class Client():
         plt.savefig(path)
         plt.close()
 
-    def sampling_rate_compare(self, governor, uc, sampling_rate_values):
+    def sampling_rate_compare(self, governor, uc):
         ## warmup ##
         self.set_scaling_governor('ondemand')
         self.time_energy_stats()
@@ -299,7 +299,7 @@ class Client():
         energy_list.append(energy)
         time_list.append(time)
 
-    def sampling_rate_line(self, governor, uc, sampling_rate_values):
+    def sampling_rate_line(self, governor, uc):
         energy_list = []
         time_list = []
 
@@ -309,14 +309,14 @@ class Client():
         return {'energy_list':energy_list, 'time_list':time_list}
 
     def sampling_rate_plot_line(self, governor, uc, color, marker,
-                                ax_kwargs, sampling_rate_values):
-        data_gov = self.sampling_rate_line(governor, uc, sampling_rate_values)
+                                                            ax_kwargs):
+        data_gov = self.sampling_rate_line(governor, uc)
         plt.plot(data_gov['energy_list'], data_gov['time_list'],
                     color=color, marker=marker, label=governor + ", uc=" + str(uc))
         for i, txt in enumerate(sampling_rate_values):
             ax_kwargs.annotate(txt, (data_gov['energy_list'][i], data_gov['time_list'][i]))
 
-    def governors_compare_sampling_rate(self, sampling_rate_values):
+    def governors_compare_sampling_rate(self):
         ## warmup ##
         self.set_scaling_governor('ondemand')
         self.time_energy_stats()
@@ -327,11 +327,11 @@ class Client():
         fig, ax_kwargs = plt.subplots()
 
         for gov in ondemand_governors:
-            self.sampling_rate_plot_line(gov['governor'], gov['uc'], gov['color'], gov['marker'],
-                                         ax_kwargs, sampling_rate_values)
+            self.sampling_rate_plot_line(gov['governor'], gov['uc'],
+                                    gov['color'], gov['marker'], ax_kwargs)
         for gov in adaptive_governors:
-            self.sampling_rate_plot_line(gov['governor'], gov['uc'], gov['color'], gov['marker'],
-                                         ax_kwargs, sampling_rate_values)
+            self.sampling_rate_plot_line(gov['governor'], gov['uc'],
+                                    gov['color'], gov['marker'], ax_kwargs)
         self.set_sampling_rate(default_sampling_rate)
 
         plt.xlabel('energy')
@@ -359,6 +359,7 @@ class Client():
             setattr(self, params_name, params_value)
             if len(params_copy) == 0:
                 self.governors_compare()
+                self.governors_compare_sampling_rate()
             else:
                 self.sweep_param(params_copy, params_names_list)
 
