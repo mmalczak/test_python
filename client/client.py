@@ -26,6 +26,8 @@ adaptive_governors=[{'governor':'adaptive', 'uc':0, 'color':'darkblue', 'marker'
                     {'governor':'adaptive', 'uc':90, 'color':'pink', 'marker':'s'},
                     {'governor':'adaptive', 'uc':100, 'color':'crimson', 'marker':'s'}]
 
+sampling_rate_values = [10000, 20000, 40000, 80000, 160000, 320000, 640000];
+default_sampling_rate = 10000
 
 def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
     plt.scatter(data['energy_list'], data['time_list'], color=color,
@@ -330,6 +332,7 @@ class Client():
         for gov in adaptive_governors:
             self.sampling_rate_plot_line(gov['governor'], gov['uc'], gov['color'], gov['marker'],
                                          ax_kwargs, sampling_rate_values)
+        self.set_sampling_rate(default_sampling_rate)
 
         plt.xlabel('energy')
         plt.ylabel('time')
