@@ -7,6 +7,7 @@ import seaborn as sns
 from confidence_ellipse import confidence_ellipse
 from plot_kernel_data import plot_kernel_data
 import sys
+import os
 
 # plm - problem length modulation
 # dm - delay modulation
@@ -116,8 +117,11 @@ class Client():
             plt.plot(self.plm_sig)
             figure = plt.gcf()
             figure.set_size_inches(16, 12)
-            plt.savefig(project_location + 'test_python/plots/mod_vs_tlm/' +
-                                str(self) + ', modulation_signals.png')
+            path = project_location + 'test_python/plots/mod_vs_tlm/'
+            if not os.path.exists(path):
+                os.mkdir(path)
+            path = path + str(self) + ', modulation_signals.png'
+            plt.savefig(path)
             plt.close()
 
     def stress_server(self):
@@ -260,6 +264,8 @@ class Client():
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
         path = project_location + 'test_python/plots/scatter/'
+        if not os.path.exists(path):
+            os.mkdir(path)
         path = path + str(self)
         path = path + '.png'
         plt.savefig(path)
@@ -285,6 +291,8 @@ class Client():
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
         path = project_location + 'test_python/plots/sampling_rate/'
+        if not os.path.exists(path):
+            os.mkdir(path)
         path = path + str(self)
         path = path + ',' + governor
         path = path + ',' + str(uc)
@@ -340,6 +348,8 @@ class Client():
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
         path = project_location + 'test_python/plots/sampling_rate/'
+        if not os.path.exists(path):
+            os.mkdir(path)
         path = path + str(self)
         path = path + '.png'
         plt.savefig(path)
