@@ -39,8 +39,6 @@ def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
     plt.xlabel('energy')
     plt.ylabel('time')
 
-project_location = sys.argv[2]
-
 class Client():
 
     def __init__(self, task, num_tasks, dm_freq, plm_freq, dm_scale, plm_scale,
@@ -59,6 +57,7 @@ class Client():
         self.num_conn = 8
         self.sockets = []
 
+
         for i in range(0, self.num_conn):
             port = 5550 + i
             self.sockets.append(self.context.socket(zmq.DEALER))
@@ -68,6 +67,9 @@ class Client():
         self.control_socket = self.context.socket(zmq.DEALER)
         ip = sys.argv[1]
         self.control_socket.connect("tcp://" + ip + ":"+str(5540))
+
+        self.project_location = os.path.realpath(os.getcwd()+'/../')
+        self.create_folders()
 
     def __str__(self):
         string = ""
@@ -81,6 +83,18 @@ class Client():
         string = string + ",increasing_freq_{}".format(self.increasing_freq)
         string = string + ",square_{}".format(self.square)
         return string
+
+    def create_folders(self):
+        data_types = ['/plots/', '/data/']
+        data_folders = ['mod_vs_tlm', 'sampling_rate', 'scatter']
+        for d_type in data_types:
+            path = self.project_location + d_type
+            if not os.path.exists(path):
+                os.mkdir(path)
+            for folder in data_folders:
+                path = self.project_location + d_type + folder
+                if not os.path.exists(path):
+                    os.mkdir(path)
 
     def init_arrays(self, modulation_plots):
         t = np.array(range(0, self.num_tasks))/self.num_tasks
@@ -118,9 +132,7 @@ class Client():
             plt.plot(self.plm_sig)
             figure = plt.gcf()
             figure.set_size_inches(16, 12)
-            path = project_location + 'test_python/plots/mod_vs_tlm/'
-            if not os.path.exists(path):
-                os.mkdir(path)
+            path = self.project_location + '/plots/mod_vs_tlm/'
             path = path + str(self) + ', modulation_signals.png'
             plt.savefig(path)
             plt.close()
@@ -185,7 +197,7 @@ class Client():
                                             'args':None})
             self.control_socket.send(control_message)
             data = self.control_socket.recv()
-            plot_kernel_data(data, project_location, str(self))
+            plot_kernel_data(data, self.project_location, str(self))
         ### telemetry read ###
 
         return {'energy':energy, 'time':total_time}
@@ -264,9 +276,7 @@ class Client():
         plt.legend()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
-        path = project_location + 'test_python/plots/scatter/'
-        if not os.path.exists(path):
-            os.mkdir(path)
+        path = self.project_location + '/plots/scatter/'
         path = path + str(self)
         path = path + '.png'
         plt.savefig(path)
@@ -291,9 +301,7 @@ class Client():
         plt.legend()
         figure = plt.gcf()
         figure.set_size_inches(16, 12)
-        path = project_location + 'test_python/plots/sampling_rate/'
-        if not os.path.exists(path):
-            os.mkdir(path)
+        path = self.project_location + '/plots/sampling_rate/'
         path = path + str(self)
         path = path + ',' + governor
         path = path + ',' + str(uc)
@@ -350,9 +358,7 @@ class Client():
             plt.legend()
             figure = plt.gcf()
             figure.set_size_inches(16, 12)
-            path = project_location + 'test_python/plots/sampling_rate/'
-            if not os.path.exists(path):
-                os.mkdir(path)
+            path = self.project_location + '/plots/sampling_rate/'
             path = path + str(self)
             path = path + '.png'
             plt.savefig(path)
@@ -369,9 +375,7 @@ class Client():
                 gov_data[-1].update(temp)
             self.set_sampling_rate(default_sampling_rate)
             gov_data = pd.DataFrame(gov_data)
-            path = project_location + 'test_python/data/sampling_rate/'
-            if not os.path.exists(path):
-                os.mkdir(path)
+            path = self.project_location + '/data/sampling_rate/'
             path = path + str(self)
             path = path + '.csv'
             gov_data.to_csv(path, index=False)
