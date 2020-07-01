@@ -13,20 +13,20 @@ import os
 # plm - problem length modulation
 # dm - delay modulation
 
-passive_governors=[{'governor':'performance', 'uc':'NA', 'color':(0.7, 0.7, 0.7), 'marker':'o'},
-                   {'governor':'powersave', 'uc':'NA', 'color':(0.3, 0.3, 0.3), 'marker':'o'}]
-ondemand_governors=[{'governor':'ondemand', 'uc':'NA', 'color':(0, 0, 0), 'marker':'s'}]
-adaptive_governors=[{'governor':'adaptive', 'uc':0, 'color':'darkblue', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':10, 'color':'brown', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':20, 'color':'peru', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':30, 'color':'gold', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':40, 'color':'lime', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':50, 'color':'aqua', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':60, 'color':'dodgerblue', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':70, 'color':'yellow', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':80, 'color':'darkviolet', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':90, 'color':'pink', 'marker':'s'},
-                    {'governor':'adaptive', 'uc':100, 'color':'crimson', 'marker':'s'}]
+passive_governors=[{'governor':'performance', 'uc':'NA', 'color':'silver', 'marker':'o'},
+                   {'governor':'powersave', 'uc':'NA', 'color':'dimgray', 'marker':'o'}]
+ondemand_governors=[{'governor':'ondemand', 'uc':'NA', 'color':'black', 'marker':'s'}]
+adaptive_governors=[{'governor':'adaptive', 'uc':0, 'color':'darkblue', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':10, 'color':'brown', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':20, 'color':'peru', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':30, 'color':'gold', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':40, 'color':'lime', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':50, 'color':'aqua', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':60, 'color':'dodgerblue', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':70, 'color':'yellow', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':80, 'color':'darkviolet', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':90, 'color':'pink', 'marker':'x'},
+                    {'governor':'adaptive', 'uc':100, 'color':'crimson', 'marker':'x'}]
 
 sampling_rate_values = [10000, 20000, 40000, 80000, 160000, 320000, 640000];
 default_sampling_rate = 10000
