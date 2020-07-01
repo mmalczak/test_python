@@ -5,6 +5,7 @@ import seaborn as sns
 import sys
 import os
 from ast import literal_eval
+from matplotlib.animation import FuncAnimation
 
 project_location = os.path.realpath(os.getcwd()+'/../')
 data_location = project_location + '/data/sampling_rate/'
@@ -18,26 +19,102 @@ data['energy_list'] = data['energy_list'].apply(literal_eval)
 data['time_list'] = data['time_list'].apply(literal_eval)
 
 sns.set()
-plt.figure(1)
+
+#plt.figure(1)
+#fig, ax_kwargs = plt.subplots()
+#
+#for gov in data.iterrows():
+#    plt.plot(gov[1]['energy_list'], gov[1]['time_list'],
+#            color=gov[1]['color'], marker=gov[1]['marker'],
+#            label=gov[1]['governor'] + ", uc=" + str(gov[1]['uc']))
+#    for i, txt in enumerate(gov[1]['sampling_rate_list']):
+#        ax_kwargs.annotate(txt, (gov[1]['energy_list'][i], gov[1]['time_list'][i]))
+#plt.xlabel('energy')
+#plt.ylabel('time')
+#plt.legend()
+
+
+#plt.figure(2)
+#fig, ax_kwargs = plt.subplots()
+#print(data)
+#l = len(data['sampling_rate_list'].loc[0])
+#for i in range(l):
+#    energy_line = []
+#    time_line = []
+#    for gov in data.iterrows():
+#        if gov[1]['governor'] == 'adaptive':
+#            energy_line.append(gov[1]['energy_list'][i])
+#            time_line.append(gov[1]['time_list'][i])
+#        if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
+#            ax_kwargs.annotate(gov[1]['uc'], (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+#
+#        if gov[1]['governor'] == 'ondemand':
+#            plt.scatter(gov[1]['energy_list'][i], gov[1]['time_list'][i])
+#            ax_kwargs.annotate('ondemand', (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+#    plt.plot(energy_line, time_line, label=str(gov[1]['sampling_rate_list'][i]))
+#plt.xlabel('energy')
+#plt.ylabel('time')
+#plt.legend()
+
+
+plt.figure(2)
+
+
 fig, ax_kwargs = plt.subplots()
+fig.set_size_inches(16, 12)
+l = len(data['sampling_rate_list'].loc[0])
 
-for gov in data.iterrows():
-    plt.plot(gov[1]['energy_list'], gov[1]['time_list'],
-            color=gov[1]['color'], marker=gov[1]['marker'],
-            label=gov[1]['governor'] + ", uc=" + str(gov[1]['uc']))
-    for i, txt in enumerate(gov[1]['sampling_rate_list']):
-        ax_kwargs.annotate(txt, (gov[1]['energy_list'][i], gov[1]['time_list'][i]))
+max_x = 0
+min_x = 10e9
+max_y = 0
+min_y = 10e9
+for i in range(l):
+    for gov in data.iterrows():
+        if gov[1]['energy_list'][i] > max_x:
+            max_x = gov[1]['energy_list'][i]
+        if gov[1]['energy_list'][i] < min_x:
+            min_x = gov[1]['energy_list'][i]
+        if gov[1]['time_list'][i] > max_y:
+            max_y = gov[1]['time_list'][i]
+        if gov[1]['time_list'][i] < min_y:
+            min_y = gov[1]['time_list'][i]
+
+def animate(i):
+    plt.cla()
+    energy_line = []
+    time_line = []
+    for gov in data.iterrows():
+        if gov[1]['governor'] == 'adaptive':
+            energy_line.append(gov[1]['energy_list'][i])
+            time_line.append(gov[1]['time_list'][i])
+        if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
+            ax_kwargs.annotate(gov[1]['uc'], (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+
+        if gov[1]['governor'] == 'ondemand':
+            plt.scatter(gov[1]['energy_list'][i], gov[1]['time_list'][i])
+            ax_kwargs.annotate('ondemand', (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+    plt.plot(energy_line, time_line, label=str(gov[1]['sampling_rate_list'][i]))
+    plt.ylim((0.9*min_y,1.1*max_y))
+    plt.xlim((0.9*min_x,1.1*max_x))
+    plt.xlabel('energy')
+    plt.ylabel('time')
+    #plt.legend()
+    plt.text(0.9*max_x, max_y, 'sampling rate = ' + str(gov[1]['sampling_rate_list'][i]))
+#    figure = plt.gcf()
+#    figure.set_size_inches(16, 12)
 
 
-plt.xlabel('energy')
-plt.ylabel('time')
-plt.legend()
+anim = FuncAnimation(fig, animate, frames=l, interval=1000)
+
+
 #figure = plt.gcf()
 #figure.set_size_inches(16, 12)
-#path = plot_location
-#path = path + name
+path = plot_location
+path = path + name
 #path = path + '.png'
 #plt.savefig(path)
 #plt.close()
-plt.show()
+#plt.show()
 
+anim.save(path + '.gif', writer='imagemagick')
+#anim.save(path + '.gif', writer='ffmpeg')
