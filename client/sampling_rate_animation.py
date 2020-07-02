@@ -12,7 +12,7 @@ data_location = project_location + '/data/sampling_rate/'
 plot_location = project_location + '/plots/sampling_rate/'
 
 
-name = 'task_fft,num_tasks_2,dm_freq_1,plm_freq_1,dm_scale_0.000,plm_scale_65536,num_measurements_2,increasing_freq_False,square_False'
+name = 'task_fft,num_tasks_2,dm_freq_1,plm_freq_1,dm_scale_0.000,plm_scale_65536,num_measurements_2,increasing_freq_False,square_False_governors_compare'
 data = pd.read_csv(data_location + name + '.csv')
 data['sampling_rate_list'] = data['sampling_rate_list'].apply(literal_eval)
 data['energy_list'] = data['energy_list'].apply(literal_eval)

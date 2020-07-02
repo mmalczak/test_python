@@ -360,7 +360,7 @@ class Client():
             figure.set_size_inches(16, 12)
             path = self.project_location + '/plots/sampling_rate/'
             path = path + str(self)
-            path = path + '.png'
+            path = path + '_governors_compare' + '.png'
             plt.savefig(path)
             plt.close()
         else:
@@ -377,7 +377,7 @@ class Client():
             gov_data = pd.DataFrame(gov_data)
             path = self.project_location + '/data/sampling_rate/'
             path = path + str(self)
-            path = path + '.csv'
+            path = path + '_governors_compare' + '.csv'
             gov_data.to_csv(path, index=False)
 
 
