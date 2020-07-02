@@ -62,29 +62,34 @@ class Container:
         energy_line = []
         time_line = []
         for gov in self.data.iterrows():
+            energy_list = gov[1]['energy_list']
+            time_list = gov[1]['time_list']
             if gov[1]['governor'] == 'adaptive':
-                energy_line.append(gov[1]['energy_list'][i])
-                time_line.append(gov[1]['time_list'][i])
+                energy_line.append(energy_list[i])
+                time_line.append(time_list[i])
             if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
                 self.ax_kwargs.annotate(gov[1]['uc'],
-                                (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+                                        (energy_list[i],time_list[i]))
             if gov[1]['governor'] == 'ondemand':
-                plt.scatter(gov[1]['energy_list'][i], gov[1]['time_list'][i])
+                plt.scatter(energy_list[i], time_list[i])
                 self.ax_kwargs.annotate('ondemand',
-                                (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+                                        (energy_list[i],time_list[i]))
 
-        plt.plot(energy_line, time_line, label=str(gov[1]['sampling_rate_list'][i]))
+        plt.plot(energy_line, time_line,
+                    label=str(gov[1]['sampling_rate_list'][i]))
         plt.text(0.9*self.max_x, self.max_y,
                     'sampling rate = ' + str(gov[1]['sampling_rate_list'][i]))
 
     @plot_common
     def plot_gov_line(self):
         for gov in self.data.iterrows():
-            plt.plot(gov[1]['energy_list'], gov[1]['time_list'],
+            energy_list = gov[1]['energy_list']
+            time_list = gov[1]['time_list']
+            plt.plot(energy_list, time_list,
                     color=gov[1]['color'], marker=gov[1]['marker'],
                     label=gov[1]['governor'] + ", uc=" + str(gov[1]['uc']))
             for i, txt in enumerate(gov[1]['sampling_rate_list']):
-                self.ax_kwargs.annotate(txt, (gov[1]['energy_list'][i], gov[1]['time_list'][i]))
+                self.ax_kwargs.annotate(txt, (energy_list[i], time_list[i]))
         plt.legend()
 
     @plot_common
@@ -93,31 +98,38 @@ class Container:
             energy_line = []
             time_line = []
             for gov in self.data.iterrows():
+                energy_list = gov[1]['energy_list']
+                time_list = gov[1]['time_list']
                 if gov[1]['governor'] == 'adaptive':
-                    energy_line.append(gov[1]['energy_list'][i])
-                    time_line.append(gov[1]['time_list'][i])
+                    energy_line.append(energy_list[i])
+                    time_line.append(time_list[i])
                 if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
-                    self.ax_kwargs.annotate(gov[1]['uc'], (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
-
+                    self.ax_kwargs.annotate(gov[1]['uc'],
+                                            (energy_list[i],time_list[i]))
                 if gov[1]['governor'] == 'ondemand':
-                    plt.scatter(gov[1]['energy_list'][i], gov[1]['time_list'][i])
-                    self.ax_kwargs.annotate('ondemand', (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
-            plt.plot(energy_line, time_line, label=str(gov[1]['sampling_rate_list'][i]))
+                    plt.scatter(energy_list[i], time_list[i])
+                    self.ax_kwargs.annotate('ondemand',
+                                            (energy_list[i],time_list[i]))
+            plt.plot(energy_line, time_line,
+                        label=str(gov[1]['sampling_rate_list'][i]))
         plt.legend()
 
     def produce_figures(self, *args):
         for csv_name in os.listdir(data_location):
             png_name = csv_name.replace('.csv', '.png')
             gif_name = csv_name.replace('.csv', '.gif')
-            cont.get_data(data_location + csv_name)
+            self.get_data(data_location + csv_name)
             if 'gov_line' in args:
                 self.plot_gov_line()
-                plt.savefig(plot_location + png_name.replace('.png', '_gov_line.png'))
+                plt.savefig(plot_location + png_name.replace('.png',
+                                                            '_gov_line.png'))
             if 'samp_rate_line' in args:
                 self.plot_samp_rate_line()
-                plt.savefig(plot_location + png_name.replace('.png', '_samp_rate_line.png'))
+                plt.savefig(plot_location + png_name.replace('.png',
+                                                        '_samp_rate_line.png'))
             if 'animation' in args:
-                anim = FuncAnimation(cont.fig, cont.animate, frames=cont.l, interval=1000)
+                anim = FuncAnimation(self.fig, self.animate, frames=self.l,
+                                     interval=1000)
                 anim.save(plot_location + gif_name, writer='imagemagick')
 
 cont = Container()
