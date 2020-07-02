@@ -11,66 +11,73 @@ project_location = os.path.realpath(os.getcwd()+'/../')
 data_location = project_location + '/data/sampling_rate/'
 plot_location = project_location + '/plots/sampling_rate/'
 
+class Container:
+    def __init__(self):
+        self.data = None
+        self.l = None
+        self.max_x = 0
+        self.min_x = 10e9
+        self.max_y = 0
+        self.min_y = 10e9
 
+        sns.set()
+        self.fig, self.ax_kwargs = plt.subplots()
+        self.fig.set_size_inches(16, 12)
 
-def get_data(path):
-    data = pd.read_csv(path)
-    data['sampling_rate_list'] = data['sampling_rate_list'].apply(literal_eval)
-    data['energy_list'] = data['energy_list'].apply(literal_eval)
-    data['time_list'] = data['time_list'].apply(literal_eval)
-    return data
+    def get_data(self, path):
+        self.max_x = 0
+        self.min_x = 10e9
+        self.max_y = 0
+        self.min_y = 10e9
 
-name = 'task_fft,num_tasks_2,dm_freq_1,plm_freq_1,dm_scale_0.000,plm_scale_65536,num_measurements_2,increasing_freq_False,square_False_governors_compare'
-data = get_data(data_location + name + '.csv')
+        self.data = pd.read_csv(path)
+        self.data['sampling_rate_list'] = self.data['sampling_rate_list'].apply(literal_eval)
+        self.data['energy_list'] = self.data['energy_list'].apply(literal_eval)
+        self.data['time_list'] = self.data['time_list'].apply(literal_eval)
 
-l = len(data['sampling_rate_list'].loc[0])
+        self.l = len(self.data['sampling_rate_list'].loc[0])
 
-max_x = 0
-min_x = 10e9
-max_y = 0
-min_y = 10e9
-for i in range(l):
-    for gov in data.iterrows():
-        if gov[1]['energy_list'][i] > max_x:
-            max_x = gov[1]['energy_list'][i]
-        if gov[1]['energy_list'][i] < min_x:
-            min_x = gov[1]['energy_list'][i]
-        if gov[1]['time_list'][i] > max_y:
-            max_y = gov[1]['time_list'][i]
-        if gov[1]['time_list'][i] < min_y:
-            min_y = gov[1]['time_list'][i]
+        for i in range(self.l):
+            for gov in self.data.iterrows():
+                if gov[1]['energy_list'][i] > self.max_x:
+                    self.max_x = gov[1]['energy_list'][i]
+                if gov[1]['energy_list'][i] < self.min_x:
+                    self.min_x = gov[1]['energy_list'][i]
+                if gov[1]['time_list'][i] > self.max_y:
+                    self.max_y = gov[1]['time_list'][i]
+                if gov[1]['time_list'][i] < self.min_y:
+                    self.min_y = gov[1]['time_list'][i]
 
-def animate(i):
-    plt.cla()
-    energy_line = []
-    time_line = []
-    for gov in data.iterrows():
-        if gov[1]['governor'] == 'adaptive':
-            energy_line.append(gov[1]['energy_list'][i])
-            time_line.append(gov[1]['time_list'][i])
-        if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
-            ax_kwargs.annotate(gov[1]['uc'],
-                            (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
-        if gov[1]['governor'] == 'ondemand':
-            plt.scatter(gov[1]['energy_list'][i], gov[1]['time_list'][i])
-            ax_kwargs.annotate('ondemand',
-                            (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+    def animate(self, i):
+        plt.cla()
+        energy_line = []
+        time_line = []
+        for gov in self.data.iterrows():
+            if gov[1]['governor'] == 'adaptive':
+                energy_line.append(gov[1]['energy_list'][i])
+                time_line.append(gov[1]['time_list'][i])
+            if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
+                self.ax_kwargs.annotate(gov[1]['uc'],
+                                (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+            if gov[1]['governor'] == 'ondemand':
+                plt.scatter(gov[1]['energy_list'][i], gov[1]['time_list'][i])
+                self.ax_kwargs.annotate('ondemand',
+                                (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
 
-    plt.plot(energy_line, time_line, label=str(gov[1]['sampling_rate_list'][i]))
-    plt.ylim((0.9*min_y,1.1*max_y))
-    plt.xlim((0.9*min_x,1.1*max_x))
-    plt.xlabel('energy')
-    plt.ylabel('time')
-    plt.text(0.9*max_x, max_y,
-                'sampling rate = ' + str(gov[1]['sampling_rate_list'][i]))
+        plt.plot(energy_line, time_line, label=str(gov[1]['sampling_rate_list'][i]))
+        plt.ylim((0.9*self.min_y,1.1*self.max_y))
+        plt.xlim((0.9*self.min_x,1.1*self.max_x))
+        plt.xlabel('energy')
+        plt.ylabel('time')
+        plt.text(0.9*self.max_x, self.max_y,
+                    'sampling rate = ' + str(gov[1]['sampling_rate_list'][i]))
 
+    def produce_animations(self):
+        for csv_name in os.listdir(data_location):
+            gif_name = csv_name.replace('.csv', '.gif')
+            cont.get_data(data_location + csv_name)
+            anim = FuncAnimation(cont.fig, cont.animate, frames=cont.l, interval=1000)
+            anim.save(plot_location + gif_name, writer='imagemagick')
 
-sns.set()
-fig, ax_kwargs = plt.subplots()
-fig.set_size_inches(16, 12)
-
-anim = FuncAnimation(fig, animate, frames=l, interval=1000)
-
-path = plot_location
-path = path + name
-anim.save(path + '.gif', writer='imagemagick')
+cont = Container()
+cont.produce_animations()
