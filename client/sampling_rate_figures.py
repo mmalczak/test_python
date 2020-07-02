@@ -11,6 +11,16 @@ project_location = os.path.realpath(os.getcwd()+'/../')
 data_location = project_location + '/data/sampling_rate/'
 plot_location = project_location + '/plots/sampling_rate/'
 
+def plot_common(decorated_function):
+    def wrapper(self, *args):
+        plt.cla()
+        decorated_function(self, *args)
+        plt.ylim((0.9*self.min_y,1.1*self.max_y))
+        plt.xlim((0.9*self.min_x,1.1*self.max_x))
+        plt.xlabel('energy')
+        plt.ylabel('time')
+    return wrapper
+
 class Container:
     def __init__(self):
         self.data = None
@@ -48,8 +58,8 @@ class Container:
                 if gov[1]['time_list'][i] < self.min_y:
                     self.min_y = gov[1]['time_list'][i]
 
+    @plot_common
     def animate(self, i):
-        plt.cla()
         energy_line = []
         time_line = []
         for gov in self.data.iterrows():
@@ -65,27 +75,21 @@ class Container:
                                 (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
 
         plt.plot(energy_line, time_line, label=str(gov[1]['sampling_rate_list'][i]))
-        plt.ylim((0.9*self.min_y,1.1*self.max_y))
-        plt.xlim((0.9*self.min_x,1.1*self.max_x))
-        plt.xlabel('energy')
-        plt.ylabel('time')
         plt.text(0.9*self.max_x, self.max_y,
                     'sampling rate = ' + str(gov[1]['sampling_rate_list'][i]))
 
+    @plot_common
     def plot_gov_line(self):
-        plt.cla()
         for gov in self.data.iterrows():
             plt.plot(gov[1]['energy_list'], gov[1]['time_list'],
                     color=gov[1]['color'], marker=gov[1]['marker'],
                     label=gov[1]['governor'] + ", uc=" + str(gov[1]['uc']))
             for i, txt in enumerate(gov[1]['sampling_rate_list']):
                 self.ax_kwargs.annotate(txt, (gov[1]['energy_list'][i], gov[1]['time_list'][i]))
-        plt.xlabel('energy')
-        plt.ylabel('time')
         plt.legend()
 
+    @plot_common
     def plot_samp_rate_line(self):
-        plt.cla()
         for i in range(self.l):
             energy_line = []
             time_line = []
@@ -100,8 +104,6 @@ class Container:
                     plt.scatter(gov[1]['energy_list'][i], gov[1]['time_list'][i])
                     self.ax_kwargs.annotate('ondemand', (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
             plt.plot(energy_line, time_line, label=str(gov[1]['sampling_rate_list'][i]))
-        plt.xlabel('energy')
-        plt.ylabel('time')
         plt.legend()
 
     def produce_figures(self, *args):
@@ -118,8 +120,6 @@ class Container:
             if 'animation' in args:
                 anim = FuncAnimation(cont.fig, cont.animate, frames=cont.l, interval=1000)
                 anim.save(plot_location + gif_name, writer='imagemagick')
-
-
 
 cont = Container()
 cont.produce_figures('animation', 'gov_line', 'samp_rate_line')
