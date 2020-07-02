@@ -72,12 +72,54 @@ class Container:
         plt.text(0.9*self.max_x, self.max_y,
                     'sampling rate = ' + str(gov[1]['sampling_rate_list'][i]))
 
-    def produce_animations(self):
+    def plot_gov_line(self):
+        plt.cla()
+        for gov in self.data.iterrows():
+            plt.plot(gov[1]['energy_list'], gov[1]['time_list'],
+                    color=gov[1]['color'], marker=gov[1]['marker'],
+                    label=gov[1]['governor'] + ", uc=" + str(gov[1]['uc']))
+            for i, txt in enumerate(gov[1]['sampling_rate_list']):
+                self.ax_kwargs.annotate(txt, (gov[1]['energy_list'][i], gov[1]['time_list'][i]))
+        plt.xlabel('energy')
+        plt.ylabel('time')
+        plt.legend()
+
+    def plot_samp_rate_line(self):
+        plt.cla()
+        for i in range(self.l):
+            energy_line = []
+            time_line = []
+            for gov in self.data.iterrows():
+                if gov[1]['governor'] == 'adaptive':
+                    energy_line.append(gov[1]['energy_list'][i])
+                    time_line.append(gov[1]['time_list'][i])
+                if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
+                    self.ax_kwargs.annotate(gov[1]['uc'], (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+
+                if gov[1]['governor'] == 'ondemand':
+                    plt.scatter(gov[1]['energy_list'][i], gov[1]['time_list'][i])
+                    self.ax_kwargs.annotate('ondemand', (gov[1]['energy_list'][i],gov[1]['time_list'][i]))
+            plt.plot(energy_line, time_line, label=str(gov[1]['sampling_rate_list'][i]))
+        plt.xlabel('energy')
+        plt.ylabel('time')
+        plt.legend()
+
+    def produce_figures(self, *args):
         for csv_name in os.listdir(data_location):
+            png_name = csv_name.replace('.csv', '.png')
             gif_name = csv_name.replace('.csv', '.gif')
             cont.get_data(data_location + csv_name)
-            anim = FuncAnimation(cont.fig, cont.animate, frames=cont.l, interval=1000)
-            anim.save(plot_location + gif_name, writer='imagemagick')
+            if 'gov_line' in args:
+                self.plot_gov_line()
+                plt.savefig(plot_location + png_name.replace('.png', '_gov_line.png'))
+            if 'samp_rate_line' in args:
+                self.plot_samp_rate_line()
+                plt.savefig(plot_location + png_name.replace('.png', '_samp_rate_line.png'))
+            if 'animation' in args:
+                anim = FuncAnimation(cont.fig, cont.animate, frames=cont.l, interval=1000)
+                anim.save(plot_location + gif_name, writer='imagemagick')
+
+
 
 cont = Container()
-cont.produce_animations()
+cont.produce_figures('animation', 'gov_line', 'samp_rate_line')
