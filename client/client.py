@@ -238,12 +238,15 @@ class Client():
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
 
-    def get_governor_data(self, governor, uc):
+    def set_governor(self, governor, uc):
         print(governor)
         print("uc = " + str(uc))
         self.set_scaling_governor(governor)
         if uc is not 'NA':
             self.set_uc(uc)
+
+    def get_governor_data(self, governor, uc):
+        self.set_governor(governor, uc)
         ret = self.time_energy_stats()
         return ret
 
@@ -309,8 +312,8 @@ class Client():
         plt.savefig(path)
         plt.close()
 
-    def append_mean_data(self, governor, uc, energy_list, time_list):
-        data_gov = self.get_governor_data(governor, uc)
+    def append_mean_data(self, energy_list, time_list):
+        data_gov = self.time_energy_stats()
         energy = np.mean(data_gov['energy_list'])
         time = np.mean(data_gov['time_list'])
         energy_list.append(energy)
@@ -320,9 +323,10 @@ class Client():
         energy_list = []
         time_list = []
 
+        self.set_governor(governor, uc)
         for sampling_rate in sampling_rate_values:
             self.set_sampling_rate(sampling_rate)
-            self.append_mean_data(governor, uc, energy_list, time_list)
+            self.append_mean_data(energy_list, time_list)
         return {'energy_list':energy_list, 'time_list':time_list,
                                     'sampling_rate_list':sampling_rate_values}
 
