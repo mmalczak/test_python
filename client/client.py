@@ -352,6 +352,44 @@ class Client():
         path = path + '_governors_compare' + '.csv'
         gov_data.to_csv(path, index=False)
 
+    def adaptive_param_line(self, governor, uc, adaptive_param,
+                                adaptive_param_values):
+        energy_list = []
+        time_list = []
+
+        self.set_governor(governor, uc)
+        for adaptive_param_value in adaptive_param_values:
+            self.set_adaptive_param(adaptive_param, adaptive_param_value)
+            self.append_mean_data(energy_list, time_list)
+        return {'energy_list':energy_list, 'time_list':time_list,
+                                    'adaptive_param_list':adaptive_param_values}
+
+    def governors_compare_adaptive_param(self, adaptive_param,
+                                        adaptive_param_values, default_value):
+        data_types = ['/plots/', '/data/']
+        for d_type in data_types:
+            path = self.project_location + d_type + adaptive_param
+            if not os.path.exists(path):
+                os.mkdir(path)
+
+        ## warmup ##
+        self.set_scaling_governor('ondemand')
+        self.time_energy_stats()
+        ## warmup ##
+
+        gov_data = []
+        for gov in adaptive_governors:
+            gov_data.append(gov)
+            temp = self.adaptive_param_line(gov['governor'], gov['uc'],
+                                        adaptive_param, adaptive_param_values)
+            gov_data[-1].update(temp)
+        self.set_adaptive_param(adaptive_param, default_value)
+        gov_data = pd.DataFrame(gov_data)
+        path = self.project_location + '/data/' + adaptive_param + '/'
+        path = path + str(self)
+        path = path + '.csv'
+        gov_data.to_csv(path, index=False)
+
     def sweep_param(self, params, params_names_list):
         if params_names_list is None:
             params_names_list = [*params]
