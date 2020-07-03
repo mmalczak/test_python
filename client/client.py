@@ -395,7 +395,7 @@ class Client():
             setattr(self, params_name, params_value)
             if len(params_copy) == 0:
                 self.governors_compare()
-                self.governors_compare_sampling_rate()
+                self.governors_compare_sampling_rate(plot=False)
             else:
                 self.sweep_param(params_copy, params_names_list)
 
