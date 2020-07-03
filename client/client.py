@@ -326,60 +326,27 @@ class Client():
         return {'energy_list':energy_list, 'time_list':time_list,
                                     'sampling_rate_list':sampling_rate_values}
 
-    def sampling_rate_plot_line(self, governor, uc, color, marker,
-                                                            ax_kwargs):
-        data_gov = self.sampling_rate_line(governor, uc)
-        plt.plot(data_gov['energy_list'], data_gov['time_list'],
-                    color=color, marker=marker, label=governor + ", uc=" + str(uc))
-        for i, txt in enumerate(sampling_rate_values):
-            ax_kwargs.annotate(txt, (data_gov['energy_list'][i], data_gov['time_list'][i]))
-
-    def governors_compare_sampling_rate(self, plot=True):
+    def governors_compare_sampling_rate(self):
         ## warmup ##
         self.set_scaling_governor('ondemand')
         self.time_energy_stats()
         ## warmup ##
 
-        if plot:
-            sns.set()
-            plt.figure(1)
-            fig, ax_kwargs = plt.subplots()
-
-            for gov in ondemand_governors:
-                self.sampling_rate_plot_line(gov['governor'], gov['uc'],
-                                        gov['color'], gov['marker'], ax_kwargs)
-            for gov in adaptive_governors:
-                self.sampling_rate_plot_line(gov['governor'], gov['uc'],
-                                        gov['color'], gov['marker'], ax_kwargs)
-            self.set_sampling_rate(default_sampling_rate)
-
-            plt.xlabel('energy')
-            plt.ylabel('time')
-            plt.legend()
-            figure = plt.gcf()
-            figure.set_size_inches(16, 12)
-            path = self.project_location + '/plots/sampling_rate/'
-            path = path + str(self)
-            path = path + '_governors_compare' + '.png'
-            plt.savefig(path)
-            plt.close()
-        else:
-            gov_data = []
-            for gov in ondemand_governors:
-                gov_data.append(gov)
-                temp = self.sampling_rate_line(gov['governor'], gov['uc'])
-                gov_data[-1].update(temp)
-            for gov in adaptive_governors:
-                gov_data.append(gov)
-                temp = self.sampling_rate_line(gov['governor'], gov['uc'])
-                gov_data[-1].update(temp)
-            self.set_sampling_rate(default_sampling_rate)
-            gov_data = pd.DataFrame(gov_data)
-            path = self.project_location + '/data/sampling_rate/'
-            path = path + str(self)
-            path = path + '_governors_compare' + '.csv'
-            gov_data.to_csv(path, index=False)
-
+        gov_data = []
+        for gov in ondemand_governors:
+            gov_data.append(gov)
+            temp = self.sampling_rate_line(gov['governor'], gov['uc'])
+            gov_data[-1].update(temp)
+        for gov in adaptive_governors:
+            gov_data.append(gov)
+            temp = self.sampling_rate_line(gov['governor'], gov['uc'])
+            gov_data[-1].update(temp)
+        self.set_sampling_rate(default_sampling_rate)
+        gov_data = pd.DataFrame(gov_data)
+        path = self.project_location + '/data/sampling_rate/'
+        path = path + str(self)
+        path = path + '_governors_compare' + '.csv'
+        gov_data.to_csv(path, index=False)
 
     def sweep_param(self, params, params_names_list):
         if params_names_list is None:
@@ -395,7 +362,7 @@ class Client():
             setattr(self, params_name, params_value)
             if len(params_copy) == 0:
                 self.governors_compare()
-                self.governors_compare_sampling_rate(plot=False)
+                self.governors_compare_sampling_rate()
             else:
                 self.sweep_param(params_copy, params_names_list)
 
