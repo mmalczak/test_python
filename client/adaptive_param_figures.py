@@ -56,6 +56,9 @@ class Container:
         if(self.l == 0):
             print("Error")
 
+        ## all adaptive params should be the same
+        self.adaptive_param_list_common = self.data['adaptive_param_list'][i]
+
         for gov in self.data.iterrows():
             for value in gov[1]['energy_list']:
                 if value > self.max_x:
@@ -91,9 +94,9 @@ class Container:
                                         (energy_list[j],time_list[j]))
 
         plt.plot(energy_line, time_line,
-                    label=str(gov[1]['adaptive_param_list'][i]))
+                    label=str(self.adaptive_param_list_common[i]))
         plt.text(0.9*self.max_x, self.max_y,
-                    adaptive_param + '= ' + str(gov[1]['adaptive_param_list'][i]))
+                    adaptive_param + '= ' + str(self.adaptive_param_list_common[i]))
 
     @plot_common
     def plot_gov_line(self):
@@ -129,7 +132,7 @@ class Container:
                     self.ax_kwargs.annotate(gov[1]['governor'],
                                             (energy_list[j],time_list[j]))
             plt.plot(energy_line, time_line,
-                        label=str(gov[1]['adaptive_param_list'][i]))
+                        label=str(self.adaptive_param_list_common[i]))
         plt.legend()
 
     def produce_figures(self, *args):
