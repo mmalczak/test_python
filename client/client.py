@@ -267,13 +267,16 @@ class Client():
 
         for gov in passive_governors:
             data_gov = self.get_governor_data(gov['governor'], gov['uc'])
-            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'], gov['marker'], gov['governor'])
+            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'],
+                                                gov['marker'], gov['governor'])
         for gov in ondemand_governors:
             data_gov = self.get_governor_data(gov['governor'], gov['uc'])
-            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'], gov['marker'], gov['governor'])
+            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'],
+                                                gov['marker'], gov['governor'])
         for gov in adaptive_governors:
             data_gov = self.get_governor_data(gov['governor'], gov['uc'])
-            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'], gov['marker'],
+            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'],
+                                            gov['marker'],
                                             gov['governor'] + ', uc = ' + str(gov['uc']))
 
         plt.legend()
