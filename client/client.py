@@ -359,10 +359,23 @@ class Client():
 
         self.set_governor(governor, uc)
         for adaptive_param_value in adaptive_param_values:
-            self.set_adaptive_param(adaptive_param, adaptive_param_value)
+            if adaptive_param == 'sampling_rate':
+                self.set_sampling_rate(adaptive_param_value)
+            else:
+                self.set_adaptive_param(adaptive_param, adaptive_param_value)
             self.append_mean_data(energy_list, time_list)
         return {'energy_list':energy_list, 'time_list':time_list,
                                     'adaptive_param_list':adaptive_param_values}
+
+    def adaptive_param_point(self, governor, uc):
+        energy_list = []
+        time_list = []
+
+        self.set_governor(governor, uc)
+        self.append_mean_data(energy_list, time_list)
+        return {'energy_list':energy_list, 'time_list':time_list,
+                                    'adaptive_param_list':[]}
+
 
     def governors_compare_adaptive_param(self, adaptive_param,
                                         adaptive_param_values, default_value):
@@ -378,6 +391,20 @@ class Client():
         ## warmup ##
 
         gov_data = []
+        for gov in passive_governors:
+            gov_data.append(gov)
+            temp = self.adaptive_param_point(gov['governor'], gov['uc'])
+            gov_data[-1].update(temp)
+        for gov in ondemand_governors:
+            if adaptive_param == 'sampling_rate':
+                gov_data.append(gov)
+                temp = self.adaptive_param_line(gov['governor'], gov['uc'],
+                                            adaptive_param, adaptive_param_values)
+                gov_data[-1].update(temp)
+            else:
+                gov_data.append(gov)
+                temp = self.adaptive_param_point(gov['governor'], gov['uc'])
+                gov_data[-1].update(temp)
         for gov in adaptive_governors:
             gov_data.append(gov)
             temp = self.adaptive_param_line(gov['governor'], gov['uc'],

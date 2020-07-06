@@ -26,7 +26,7 @@ def plot_common(decorated_function):
 class Container:
     def __init__(self):
         self.data = None
-        self.l = None
+        self.l = 0
         self.max_x = 0
         self.min_x = 10e9
         self.max_y = 0
@@ -47,18 +47,27 @@ class Container:
         self.data['energy_list'] = self.data['energy_list'].apply(literal_eval)
         self.data['time_list'] = self.data['time_list'].apply(literal_eval)
 
-        self.l = len(self.data['adaptive_param_list'].loc[0])
+        ## adaptive_param_list could be empty for performance, powersave or
+        ## ondemand governors
+        i = 0
+        while self.l == 0:
+            self.l = len(self.data['adaptive_param_list'].loc[i])
+            i = i + 1
+        if(self.l == 0):
+            print("Error")
 
-        for i in range(self.l):
-            for gov in self.data.iterrows():
-                if gov[1]['energy_list'][i] > self.max_x:
-                    self.max_x = gov[1]['energy_list'][i]
-                if gov[1]['energy_list'][i] < self.min_x:
-                    self.min_x = gov[1]['energy_list'][i]
-                if gov[1]['time_list'][i] > self.max_y:
-                    self.max_y = gov[1]['time_list'][i]
-                if gov[1]['time_list'][i] < self.min_y:
-                    self.min_y = gov[1]['time_list'][i]
+        for gov in self.data.iterrows():
+            for value in gov[1]['energy_list']:
+                if value > self.max_x:
+                    self.max_x = value
+                if value < self.min_x:
+                    self.min_x = value
+            for value in gov[1]['time_list']:
+                if value > self.max_y:
+                    self.max_y = value
+                if value < self.min_y:
+                    self.min_y = value
+
 
     @plot_common
     def animate(self, i):
@@ -70,13 +79,17 @@ class Container:
             if gov[1]['governor'] == 'adaptive':
                 energy_line.append(energy_list[i])
                 time_line.append(time_list[i])
-            if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
-                self.ax_kwargs.annotate(gov[1]['uc'],
-                                        (energy_list[i],time_list[i]))
-            if gov[1]['governor'] == 'ondemand':
-                plt.scatter(energy_list[i], time_list[i])
-                self.ax_kwargs.annotate('ondemand',
-                                        (energy_list[i],time_list[i]))
+                if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
+                    self.ax_kwargs.annotate(gov[1]['uc'],
+                                            (energy_list[i],time_list[i]))
+            if gov[1]['governor'] != 'adaptive':
+            #if len(energy_list) == 1:
+                j = i
+                if j >= len(energy_list):
+                    j = 0
+                plt.scatter(energy_list[j], time_list[j])
+                self.ax_kwargs.annotate(gov[1]['governor'],
+                                        (energy_list[j],time_list[j]))
 
         plt.plot(energy_line, time_line,
                     label=str(gov[1]['adaptive_param_list'][i]))
