@@ -420,7 +420,7 @@ class Client():
         path = path + '.csv'
         gov_data.to_csv(path, index=False)
 
-    def sweep_param(self, params, params_names_list):
+    def sweep_param(self, params, params_names_list, adaptive_params):
         if params_names_list is None:
             params_names_list = [*params]
             for params_name in params:
@@ -434,9 +434,11 @@ class Client():
             setattr(self, params_name, params_value)
             if len(params_copy) == 0:
                 self.governors_compare()
-                self.governors_compare_sampling_rate()
+                for adaptive_param in adaptive_params:
+                    self.governors_compare_adaptive_param(adaptive_param['name'],
+                            adaptive_param['values'], adaptive_param['default'])
             else:
-                self.sweep_param(params_copy, params_names_list)
+                self.sweep_param(params_copy, params_names_list, adaptive_params)
 
 
 # Available tasks with example arguments
