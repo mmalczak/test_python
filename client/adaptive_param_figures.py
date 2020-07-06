@@ -72,8 +72,7 @@ class Container:
                     self.min_y = value
 
 
-    @plot_common
-    def animate(self, i):
+    def plot_single_param_value(self, i):
         energy_line = []
         time_line = []
         for gov in self.data.iterrows():
@@ -92,9 +91,12 @@ class Container:
                 plt.scatter(energy_list[j], time_list[j])
                 self.ax_kwargs.annotate(gov[1]['governor'],
                                         (energy_list[j],time_list[j]))
-
         plt.plot(energy_line, time_line,
                     label=str(self.adaptive_param_list_common[i]))
+
+    @plot_common
+    def animate(self, i):
+        self.plot_single_param_value(i)
         plt.text(0.9*self.max_x, self.max_y,
                     adaptive_param + '= ' + str(self.adaptive_param_list_common[i]))
 
@@ -113,26 +115,7 @@ class Container:
     @plot_common
     def plot_adapt_param_line(self):
         for i in range(self.l):
-            energy_line = []
-            time_line = []
-            for gov in self.data.iterrows():
-                energy_list = gov[1]['energy_list']
-                time_list = gov[1]['time_list']
-                if gov[1]['governor'] == 'adaptive':
-                    energy_line.append(energy_list[i])
-                    time_line.append(time_list[i])
-                    if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
-                        self.ax_kwargs.annotate(gov[1]['uc'],
-                                                (energy_list[i],time_list[i]))
-                if gov[1]['governor'] != 'adaptive':
-                    j = i
-                    if j >= len(energy_list):
-                        j = 0
-                    plt.scatter(energy_list[j], time_list[j])
-                    self.ax_kwargs.annotate(gov[1]['governor'],
-                                            (energy_list[j],time_list[j]))
-            plt.plot(energy_line, time_line,
-                        label=str(self.adaptive_param_list_common[i]))
+            self.plot_single_param_value(i)
         plt.legend()
 
     def produce_figures(self, *args):
