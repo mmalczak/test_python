@@ -17,8 +17,10 @@ def plot_common(decorated_function):
     def wrapper(self, *args):
         plt.cla()
         decorated_function(self, *args)
-        plt.ylim((0.9*self.min_y,1.1*self.max_y))
-        plt.xlim((0.9*self.min_x,1.1*self.max_x))
+        x_d = self.max_x - self.min_x
+        y_d = self.max_y - self.min_y
+        plt.ylim((self.min_y - 0.1 * y_d, self.max_y + 0.1 * y_d))
+        plt.xlim((self.min_x - 0.1 * x_d, self.max_x + 0.1 * x_d))
         plt.xlabel('energy')
         plt.ylabel('time')
     return wrapper
@@ -97,7 +99,8 @@ class Container:
     @plot_common
     def animate(self, i):
         self.plot_single_param_value(i)
-        plt.text(0.9*self.max_x, self.max_y,
+        plt.text(self.min_x + 0.9 * (self.max_x - self.min_x),
+                self.min_y + 0.9 * (self.max_y - self.min_y),
                     adaptive_param + '= ' + str(self.adaptive_param_list_common[i]))
 
     @plot_common
