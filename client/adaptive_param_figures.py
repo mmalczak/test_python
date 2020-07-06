@@ -39,6 +39,8 @@ class Container:
         self.fig.set_size_inches(16, 12)
 
     def get_data(self, path):
+        self.data = None
+        self.l = 0
         self.max_x = 0
         self.min_x = 10e9
         self.max_y = 0
