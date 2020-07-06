@@ -83,7 +83,6 @@ class Container:
                     self.ax_kwargs.annotate(gov[1]['uc'],
                                             (energy_list[i],time_list[i]))
             if gov[1]['governor'] != 'adaptive':
-            #if len(energy_list) == 1:
                 j = i
                 if j >= len(energy_list):
                     j = 0
@@ -119,13 +118,16 @@ class Container:
                 if gov[1]['governor'] == 'adaptive':
                     energy_line.append(energy_list[i])
                     time_line.append(time_list[i])
-                if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
-                    self.ax_kwargs.annotate(gov[1]['uc'],
-                                            (energy_list[i],time_list[i]))
-                if gov[1]['governor'] == 'ondemand':
-                    plt.scatter(energy_list[i], time_list[i])
-                    self.ax_kwargs.annotate('ondemand',
-                                            (energy_list[i],time_list[i]))
+                    if gov[1]['uc'] == 0 or gov[1]['uc'] == 100:
+                        self.ax_kwargs.annotate(gov[1]['uc'],
+                                                (energy_list[i],time_list[i]))
+                if gov[1]['governor'] != 'adaptive':
+                    j = i
+                    if j >= len(energy_list):
+                        j = 0
+                    plt.scatter(energy_list[j], time_list[j])
+                    self.ax_kwargs.annotate(gov[1]['governor'],
+                                            (energy_list[j],time_list[j]))
             plt.plot(energy_line, time_line,
                         label=str(gov[1]['adaptive_param_list'][i]))
         plt.legend()
