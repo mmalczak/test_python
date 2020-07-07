@@ -79,6 +79,7 @@ class Container:
     def plot_single_param_value(self, i):
         energy_line = []
         time_line = []
+        color = next(self.ax_kwargs._get_lines.prop_cycler)['color']
         for gov in self.data.iterrows():
             energy_list = gov[1]['energy_list']
             time_list = gov[1]['time_list']
@@ -92,11 +93,14 @@ class Container:
                 j = i
                 if j >= len(energy_list):
                     j = 0
-                plt.scatter(energy_list[j], time_list[j])
+                if len(energy_list) == 1:
+                    plt.scatter(energy_list[j], time_list[j], color='black')
+                else:
+                    plt.scatter(energy_list[j], time_list[j], color=color)
                 self.ax_kwargs.annotate(gov[1]['governor'],
                                         (energy_list[j],time_list[j]))
         plt.plot(energy_line, time_line,
-                    label=str(self.adaptive_param_list_common[i]))
+                    label=str(self.adaptive_param_list_common[i]), color=color)
 
     @plot_common
     def animate(self, i):
