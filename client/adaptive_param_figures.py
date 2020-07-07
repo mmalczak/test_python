@@ -6,6 +6,7 @@ import os
 import sys
 from ast import literal_eval
 from matplotlib.animation import FuncAnimation
+from matplotlib.animation import ImageMagickFileWriter
 
 adaptive_param = sys.argv[1]
 
@@ -141,9 +142,9 @@ class Container:
                 suffix = '_' + adaptive_param + '.png'
                 plt.savefig(plot_location + png_name.replace('.png', suffix))
             if 'animation' in args:
-                anim = FuncAnimation(self.fig, self.animate, frames=self.l,
-                                     interval=1000)
-                anim.save(plot_location + gif_name, writer='imagemagick')
+                anim = FuncAnimation(self.fig, self.animate, frames=self.l)
+                writer = ImageMagickFileWriter(fps=1)
+                anim.save(plot_location + gif_name, writer=writer)
 
 cont = Container()
 cont.produce_figures('animation', 'gov_line', 'adapt_param_line')
