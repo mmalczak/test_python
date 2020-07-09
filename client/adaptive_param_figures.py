@@ -62,7 +62,7 @@ class Container:
             print("Error")
 
         ## all adaptive params should be the same
-        self.adaptive_param_list_common = self.data['adaptive_param_list'][i]
+        self.adaptive_param_list_common = self.data['adaptive_param_list'][i-1]
 
         for gov in self.data.iterrows():
             for value in gov[1]['energy_list']:
