@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from confidence_ellipse import confidence_ellipse
 from plot_kernel_data import plot_kernel_data
 import sys
 import os
@@ -30,14 +29,6 @@ adaptive_governors=[{'governor':'adaptive', 'uc':0, 'color':'darkblue', 'marker'
 
 sampling_rate_values = [10000, 20000, 40000, 80000, 160000, 320000, 640000];
 default_sampling_rate = 10000
-
-def scatter_with_confidence_ellipse(data, ax_kwargs, color, marker, label):
-    plt.scatter(data['energy_list'], data['time_list'], color=color,
-                marker=marker, label=label)
-    confidence_ellipse(data['energy_list'], data['time_list'], ax_kwargs,
-                n_std=1, edgecolor=color)
-    plt.xlabel('energy')
-    plt.ylabel('time')
 
 class Client():
 
@@ -271,32 +262,26 @@ class Client():
         self.time_energy_stats()
         ## warmup ##
 
-        sns.set()
-        plt.figure(1)
-        fig, ax_kwargs = plt.subplots()
-
+        gov_data = []
         for gov in passive_governors:
-            data_gov = self.get_governor_data(gov['governor'], gov['uc'])
-            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'],
-                                                gov['marker'], gov['governor'])
+            gov_data.append(gov)
+            temp = self.get_governor_data(gov['governor'], gov['uc'])
+            gov_data[-1].update(temp)
         for gov in ondemand_governors:
-            data_gov = self.get_governor_data(gov['governor'], gov['uc'])
-            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'],
-                                                gov['marker'], gov['governor'])
+            gov_data.append(gov)
+            temp = self.get_governor_data(gov['governor'], gov['uc'])
+            gov_data[-1].update(temp)
         for gov in adaptive_governors:
-            data_gov = self.get_governor_data(gov['governor'], gov['uc'])
-            scatter_with_confidence_ellipse(data_gov, ax_kwargs, gov['color'],
-                                            gov['marker'],
-                                            gov['governor'] + ', uc = ' + str(gov['uc']))
+            gov_data.append(gov)
+            temp = self.get_governor_data(gov['governor'], gov['uc'])
+            gov_data[-1].update(temp)
 
-        plt.legend()
-        figure = plt.gcf()
-        figure.set_size_inches(16, 12)
-        path = self.project_location + '/plots/scatter/'
+        gov_data = pd.DataFrame(gov_data)
+
+        path = self.project_location + '/data/scatter/'
         path = path + str(self)
-        path = path + '.png'
-        plt.savefig(path)
-        plt.close()
+        path = path + '.csv'
+        gov_data.to_csv(path, index=False)
 
     def append_mean_data(self, energy_list, time_list):
         data_gov = self.time_energy_stats()
