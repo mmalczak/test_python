@@ -245,8 +245,18 @@ class Client():
         if uc is not 'NA':
             self.set_uc(uc)
 
+    def inner_decorator(self, governor):
+        if governor == 'adaptive' or governor == 'ondemand':
+            self.set_sampling_rate(160000)
+        if governor == 'adaptive':
+            pass
+            #self.set_adaptive_param('Sd', '1 0.5')
+            #self.set_adaptive_param('Ao', '1 0.5 0')
+
     def get_governor_data(self, governor, uc):
         self.set_governor(governor, uc)
+        self.inner_decorator(governor)
+
         ret = self.time_energy_stats()
         return ret
 
@@ -361,6 +371,8 @@ class Client():
         time_list = []
 
         self.set_governor(governor, uc)
+        self.inner_decorator(governor)
+
         for adaptive_param_value in adaptive_param_values:
             if adaptive_param == 'sampling_rate':
                 self.set_sampling_rate(adaptive_param_value)
@@ -375,6 +387,8 @@ class Client():
         time_list = []
 
         self.set_governor(governor, uc)
+        self.inner_decorator(governor)
+
         self.append_mean_data(energy_list, time_list)
         return {'energy_list':energy_list, 'time_list':time_list,
                                     'adaptive_param_list':[]}
