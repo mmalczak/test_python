@@ -3,9 +3,6 @@ import pickle
 import time
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from plot_kernel_data import plot_kernel_data
 import sys
 import os
 
@@ -87,7 +84,7 @@ class Client():
                 if not os.path.exists(path):
                     os.mkdir(path)
 
-    def init_arrays(self, modulation_plots):
+    def init_arrays(self, export_modulation_data):
         t = np.array(range(0, self.num_tasks))/self.num_tasks
 
         #delay modulation
@@ -116,17 +113,12 @@ class Client():
             self.plm_sig = [self.plm_scale if i > self.plm_scale / 2 else 0
                                                         for i in self.plm_sig]
 
-        if modulation_plots:
-            plt.subplot(2, 1, 1, title="Delay modulation signal")
-            plt.plot(self.dm_sig)
-            plt.subplot(2, 1, 2, title="Problem length modulation signal")
-            plt.plot(self.plm_sig)
-            figure = plt.gcf()
-            figure.set_size_inches(16, 12)
-            path = self.project_location + '/plots/mod_vs_tlm/'
-            path = path + str(self) + ', modulation_signals.png'
-            plt.savefig(path)
-            plt.close()
+        if export_modulation_data:
+            data = {'dm_sig':self.dm_sig, 'plm_sig':self.plm_sig}
+            data = pd.DataFrame(data)
+            path = self.project_location + '/data/mod_vs_tlm/'
+            path = path + str(self) + ', modulation_signals.csv'
+            data.to_csv(path, index=False)
 
     def stress_server(self):
         time_diff=0
@@ -144,11 +136,11 @@ class Client():
             if sleep_time > 0:
                 time.sleep(sleep_time)
 
-    def time_energy_measurement(self, modulation_plots):
-        self.init_arrays(modulation_plots)
+    def time_energy_measurement(self, export_modulation_data):
+        self.init_arrays(export_modulation_data)
 
         ### telemetry reset ###
-        if modulation_plots:
+        if export_modulation_data:
             control_message = pickle.dumps({'task':'reset_tlm',
                                             'args':None})
             self.control_socket.send(control_message)
@@ -183,12 +175,17 @@ class Client():
         ### Energy measurement stop ###
 
         ### telemetry read ###
-        if modulation_plots:
+        if export_modulation_data:
             control_message = pickle.dumps({'task':'read_tlm',
                                             'args':None})
             self.control_socket.send(control_message)
             data = self.control_socket.recv()
-            plot_kernel_data(data, self.project_location, str(self))
+            data = data.decode('utf-8')
+            path = self.project_location + '/data/mod_vs_tlm/'
+            path = path + str(self) + '.txt'
+            f = open(path, 'w')
+            f.write(data)
+            f.close()
         ### telemetry read ###
 
         return {'energy':energy, 'time':total_time}

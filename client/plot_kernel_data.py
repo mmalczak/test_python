@@ -14,7 +14,6 @@ def get_array(x):
     return x
 
 def plot_kernel_data(data, project_location, params_str):
-    data = data.decode('utf-8')
     x_beg = 00;
     x_end = 100;
 
