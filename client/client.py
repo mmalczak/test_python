@@ -332,39 +332,6 @@ class Client():
         energy_list.append(energy)
         time_list.append(time)
 
-    def sampling_rate_line(self, governor, uc):
-        energy_list = []
-        time_list = []
-
-        self.set_governor(governor, uc)
-        for sampling_rate in sampling_rate_values:
-            self.set_sampling_rate(sampling_rate)
-            self.append_mean_data(energy_list, time_list)
-        return {'energy_list':energy_list, 'time_list':time_list,
-                                    'sampling_rate_list':sampling_rate_values}
-
-    def governors_compare_sampling_rate(self):
-        ## warmup ##
-        self.set_scaling_governor('ondemand')
-        self.time_energy_stats()
-        ## warmup ##
-
-        gov_data = []
-        for gov in ondemand_governors:
-            gov_data.append(gov)
-            temp = self.sampling_rate_line(gov['governor'], gov['uc'])
-            gov_data[-1].update(temp)
-        for gov in adaptive_governors:
-            gov_data.append(gov)
-            temp = self.sampling_rate_line(gov['governor'], gov['uc'])
-            gov_data[-1].update(temp)
-        self.set_sampling_rate(default_sampling_rate)
-        gov_data = pd.DataFrame(gov_data)
-        path = self.project_location + '/data/sampling_rate/'
-        path = path + str(self)
-        path = path + '_governors_compare' + '.csv'
-        gov_data.to_csv(path, index=False)
-
     def adaptive_param_line(self, governor, uc, adaptive_param,
                                 adaptive_param_values):
         energy_list = []
