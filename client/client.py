@@ -298,33 +298,6 @@ class Client():
         plt.savefig(path)
         plt.close()
 
-    def sampling_rate_compare(self, governor, uc):
-        ## warmup ##
-        self.set_scaling_governor('ondemand')
-        self.time_energy_stats()
-        ## warmup ##
-
-        sns.set()
-        fig, ax_kwargs = plt.subplots()
-        colors = ['b', 'g', 'r', 'c', 'm', 'lime', 'pink', 'b', 'g', 'r', 'c', 'm']
-
-        for i, sampling_rate in enumerate(sampling_rate_values):
-            self.set_sampling_rate(sampling_rate)
-            data_gov = self.get_governor_data(governor, uc)
-            scatter_with_confidence_ellipse(data_gov, ax_kwargs, colors[i],
-                                            'x', 'sampling_rate = ' + str(sampling_rate))
-
-        plt.legend()
-        figure = plt.gcf()
-        figure.set_size_inches(16, 12)
-        path = self.project_location + '/plots/sampling_rate/'
-        path = path + str(self)
-        path = path + ',' + governor
-        path = path + ',' + str(uc)
-        path = path + '.png'
-        plt.savefig(path)
-        plt.close()
-
     def append_mean_data(self, energy_list, time_list):
         data_gov = self.time_energy_stats()
         energy = np.mean(data_gov['energy_list'])
