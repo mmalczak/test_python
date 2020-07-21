@@ -8,11 +8,9 @@ from ast import literal_eval
 from matplotlib.animation import FuncAnimation
 from matplotlib.animation import ImageMagickFileWriter
 
-adaptive_param = sys.argv[1]
-
 project_location = os.path.realpath(os.getcwd()+'/../')
-data_location = project_location + '/data/' + adaptive_param + '/'
-plot_location = project_location + '/plots/' + adaptive_param + '/'
+adaptive_params_data_location = project_location + '/data/adaptive_params/'
+adaptive_params_plots_location = project_location + '/plots/adaptive_params/'
 
 def plot_common(decorated_function):
     def wrapper(self, *args):
@@ -108,7 +106,7 @@ class Container:
         self.plot_single_param_value(i)
         plt.text(self.min_x + 0.9 * (self.max_x - self.min_x),
                 self.min_y + 0.9 * (self.max_y - self.min_y),
-                    adaptive_param + '= ' + str(self.adaptive_param_list_common[i]))
+                    self.adaptive_param + '= ' + str(self.adaptive_param_list_common[i]))
 
     @plot_common
     def plot_gov_line(self):
@@ -129,22 +127,26 @@ class Container:
         plt.legend()
 
     def produce_figures(self, *args):
-        for csv_name in os.listdir(data_location):
-            png_name = csv_name.replace('.csv', '.png')
-            gif_name = csv_name.replace('.csv', '.gif')
-            self.get_data(data_location + csv_name)
-            if 'gov_line' in args:
-                self.plot_gov_line()
-                plt.savefig(plot_location + png_name.replace('.png',
-                                                            '_gov_line.png'))
-            if 'adapt_param_line' in args:
-                self.plot_adapt_param_line()
-                suffix = '_' + adaptive_param + '.png'
-                plt.savefig(plot_location + png_name.replace('.png', suffix))
-            if 'animation' in args:
-                anim = FuncAnimation(self.fig, self.animate, frames=self.l)
-                writer = ImageMagickFileWriter(fps=1)
-                anim.save(plot_location + gif_name, writer=writer)
+        for adaptive_param in os.listdir(adaptive_params_data_location):
+            self.adaptive_param = adaptive_param
+            data_location = adaptive_params_data_location + adaptive_param + '/'
+            plot_location = adaptive_params_plots_location + adaptive_param + '/'
+            for csv_name in os.listdir(data_location):
+                png_name = csv_name.replace('.csv', '.png')
+                gif_name = csv_name.replace('.csv', '.gif')
+                self.get_data(data_location + csv_name)
+                if 'gov_line' in args:
+                    self.plot_gov_line()
+                    plt.savefig(plot_location + png_name.replace('.png',
+                                                                '_gov_line.png'))
+                if 'adapt_param_line' in args:
+                    self.plot_adapt_param_line()
+                    suffix = '_' + adaptive_param + '.png'
+                    plt.savefig(plot_location + png_name.replace('.png', suffix))
+                if 'animation' in args:
+                    anim = FuncAnimation(self.fig, self.animate, frames=self.l)
+                    writer = ImageMagickFileWriter(fps=1)
+                    anim.save(plot_location + gif_name, writer=writer)
 
 cont = Container()
 cont.produce_figures('animation', 'gov_line', 'adapt_param_line')

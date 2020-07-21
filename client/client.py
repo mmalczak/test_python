@@ -74,7 +74,7 @@ class Client():
 
     def create_folders(self):
         data_types = ['/plots/', '/data/']
-        data_folders = ['mod_vs_tlm', 'sampling_rate', 'scatter']
+        data_folders = ['mod_vs_tlm', 'adaptive_params', 'scatter']
         for d_type in data_types:
             path = self.project_location + d_type
             if not os.path.exists(path):
@@ -320,7 +320,7 @@ class Client():
                                         adaptive_param_values, default_value):
         data_types = ['/plots/', '/data/']
         for d_type in data_types:
-            path = self.project_location + d_type + adaptive_param
+            path = self.project_location + d_type + 'adaptive_params/' + adaptive_param
             if not os.path.exists(path):
                 os.mkdir(path)
 
@@ -351,7 +351,7 @@ class Client():
             gov_data[-1].update(temp)
         self.set_adaptive_param(adaptive_param, default_value)
         gov_data = pd.DataFrame(gov_data)
-        path = self.project_location + '/data/' + adaptive_param + '/'
+        path = self.project_location + '/data/adaptive_params/' + adaptive_param + '/'
         path = path + str(self)
         path = path + '.csv'
         gov_data.to_csv(path, index=False)

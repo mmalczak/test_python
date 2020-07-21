@@ -21,10 +21,8 @@ def plot_common(decorated_function):
 class Container:
     def __init__(self):
         self.data = None
-
-        sns.set()
-        self.fig, self.ax_kwargs = plt.subplots()
-        self.fig.set_size_inches(16, 12)
+        self.fig = None
+        self.ax_kwargs = None
 
     def get_data(self, path):
         self.data = None
@@ -45,16 +43,24 @@ class Container:
         for gov in self.data.iterrows():
             energy_list = gov[1]['energy_list']
             time_list = gov[1]['time_list']
+            label = None
+            if gov[1]['governor'] == 'adaptive':
+                label = gov[1]['governor'] + ', uc = ' + str(gov[1]['uc'])
+            else:
+                label = gov[1]['governor']
             self.scatter_with_confidence_ellipse(energy_list, time_list,
-                    gov[1]['color'], gov[1]['marker'], gov[1]['governor'])
+                    gov[1]['color'], gov[1]['marker'], label)
 
     def produce_figures(self, *args):
         for csv_name in os.listdir(data_location):
             png_name = csv_name.replace('.csv', '.png')
             gif_name = csv_name.replace('.csv', '.gif')
+            sns.set()
+            self.fig, self.ax_kwargs = plt.subplots()
+            self.fig.set_size_inches(16, 12)
             self.get_data(data_location + csv_name)
             self.scatter()
             plt.savefig(plot_location + png_name)
-
+            plt.close()
 cont = Container()
 cont.produce_figures()

@@ -77,15 +77,6 @@ def plot_kernel_data(data, project_location, params_str):
     plt.grid()
     plt.legend(loc='upper left')
 
-    #sp = plt.subplot(N_subplot, 1, 2)
-    #sp.set_title("Input")
-    #axes = plt.gca()
-    ##axes.set_ylim([0,5000000])
-    #plt.plot(time[x_beg:x_end], freq_next[x_beg:x_end], label='v');
-    #plt.plot(time[x_beg:x_end], freq[x_beg:x_end], label='u');
-    #plt.grid()
-    #plt.legend(loc='upper left')
-
     sp = plt.subplot(N_subplot, 1, 2)
     sp.set_title("Input scaled")
     axes = plt.gca()
@@ -104,14 +95,6 @@ def plot_kernel_data(data, project_location, params_str):
     for i in range(len(theta[0])):
         leg.append("theta["+str(i)+"]")
     plt.legend(leg, loc='upper left')
-
-    #sp = plt.subplot(N_subplot, 1, 5)
-    #sp.set_title("Covariance matrix")
-    #plt.plot(time[x_beg:x_end], P[x_beg:x_end]);
-    ##leg = []
-    ##for i in range(len(theta)):
-    ##    leg.append("P["+str(i)+"]")
-    ##plt.legend(leg, loc='upper left')
 
     sp = plt.subplot(N_subplot, 1, 4)
     sp.set_title("Controller")
@@ -142,17 +125,9 @@ def plot_kernel_data(data, project_location, params_str):
     sp = plt.subplot(N_subplot, 1, 6)
     sp.set_title("phi_P_phi")
     axes = plt.gca()
-    #axes.set_ylim([-20000,-50000])
     plt.plot(time[x_beg:x_end], phi_P_phi[x_beg:x_end]);
     plt.hlines(1000, time[x_beg], time[x_end-1]);
-    #leg = []
-    #for i in range(len(D[0])):
-    #    leg.append("D["+str(i)+"]")
-    #plt.legend(leg, loc='upper left')
 
     plt.grid()
-    figure = plt.gcf()
-    figure.set_size_inches(16, 12)
     plt.savefig(project_location + '/plots/mod_vs_tlm/' +
                                     params_str + ', tlm_data.png')
-    plt.close()

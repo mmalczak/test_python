@@ -18,10 +18,8 @@ class Container:
     def __init__(self):
         self.mod_data = None
         self.tlm_data = None
-
-        sns.set()
-        self.fig, self.ax_kwargs = plt.subplots()
-        self.fig.set_size_inches(16, 12)
+        self.fig = None
+        self.ax_kwargs = None
 
     def get_data(self, path):
         if path.endswith('modulation_signals.csv'):
@@ -40,6 +38,9 @@ class Container:
 
     def produce_figures(self, *args):
         for name in os.listdir(data_location):
+            sns.set()
+            self.fig, self.ax_kwargs = plt.subplots()
+            self.fig.set_size_inches(16, 12)
             png_name = None
             self.get_data(data_location + name)
             if name.endswith('modulation_signals.csv'):
@@ -49,7 +50,7 @@ class Container:
             else:
                 name = name.replace('.txt', '')
                 plot_kernel_data(self.tlm_data, project_location, name)
-
+            plt.close()
 
 cont = Container()
 cont.produce_figures()
