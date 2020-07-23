@@ -253,6 +253,7 @@ class Client():
         print("Number of tasks = " + str(self.num_tasks))
         self.set_scaling_governor('adaptive')
         self.set_uc(60)
+        self.inner_decorator('adaptive')
         self.time_energy_measurement(True)
         ## warmup ##
         self.set_scaling_governor('ondemand')
