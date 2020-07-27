@@ -131,3 +131,32 @@ def plot_kernel_data(data, project_location, params_str):
     plt.grid()
     plt.savefig(project_location + '/plots/mod_vs_tlm/' +
                                     params_str + ', tlm_data.png')
+
+    plt.cla()
+    plt.clf()
+    sp = plt.subplot()
+    axes = plt.gca()
+    axes.set_xlim([-5, 5])
+    axes.set_ylim([-2.5, 2.5])
+    sp.set_title("Model poles and zeros")
+    zeros_re = []
+    zeros_im = []
+    poles_re = []
+    poles_im = []
+    #theta = theta[0:1]
+    for idx, theta_el in enumerate(theta):
+        A = [1] + theta_el[0:2]
+        B = theta_el[2:]
+        z = np.roots(B)
+        p = np.roots(A)
+        zeros_re.append(z.real)
+        zeros_im.append(z.imag)
+        poles_re.append(p.real)
+        poles_im.append(p.imag)
+    circle1 = plt.Circle((0, 0), 1, fill=False, color='black')
+    axes.add_artist(circle1)
+    plt.scatter(poles_re, poles_im, marker = 'x', color='r')
+    plt.scatter(zeros_re, zeros_im, marker = 'o', color='none', edgecolor='b')
+    plt.grid(True)
+    plt.savefig(project_location + '/plots/mod_vs_tlm/' +
+                                    params_str + ', poles_zeros.png')
