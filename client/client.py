@@ -230,7 +230,7 @@ class Client():
         print(governor)
         print("uc = " + str(uc))
         self.set_scaling_governor(governor)
-        if uc is not 'NA':
+        if uc != 'NA':
             self.set_uc(uc)
 
     def inner_decorator(self, governor):
