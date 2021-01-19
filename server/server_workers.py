@@ -1,29 +1,29 @@
-import zmq
-from multiprocessing import Process
 import pickle
-import numpy as np
 import sys
+from multiprocessing import Process
 
-class worker_class():
+import numpy as np
+import zmq
 
+
+class worker_class:
     def fft(self, data):
         data = np.fft.fft(data)
-        #print("fft")
-        #print(data)
+        # print("fft")
+        # print(data)
 
     def empty_loop(self, length):
         for i in range(0, length):
             pass
-        #print("empty_loop")
+        # print("empty_loop")
 
     def random_gen(self, length):
         r = np.random.rand(length)
-        #print(r)
+        # print(r)
 
     def receive_array(self, array):
         pass
-        #print(array)
-
+        # print(array)
 
 
 def socket_process(process_num):
@@ -31,11 +31,11 @@ def socket_process(process_num):
     socket = context.socket(zmq.ROUTER)
     port = 5550 + process_num
     ip = sys.argv[1]
-    socket.bind("tcp://" + ip + ":"+str(port))
+    socket.bind("tcp://" + ip + ":" + str(port))
     while True:
         [identity, message] = socket.recv_multipart()
         message = pickle.loads(message)
-        getattr(worker_class(), message['task'])(message['args'])
+        getattr(worker_class(), message["task"])(message["args"])
         socket.send_multipart([identity, b"Success"])
 
 
@@ -47,6 +47,3 @@ for i in range(0, num_cores):
     processes[i].start()
 for i in range(0, num_cores):
     processes[i].join()
-
-
-
