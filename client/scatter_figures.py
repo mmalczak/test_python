@@ -44,9 +44,14 @@ class Container:
         plt.scatter(
             energy_list, time_list, color=color, marker=marker, label=label
         )
-        confidence_ellipse(
-            energy_list, time_list, self.ax_kwargs, n_std=1, edgecolor=color
-        )
+        if len(energy_list) > 1:
+            confidence_ellipse(
+                energy_list,
+                time_list,
+                self.ax_kwargs,
+                n_std=1,
+                edgecolor=color,
+            )
         plt.xlabel("energy")
         plt.ylabel("time")
 
