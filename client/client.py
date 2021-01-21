@@ -143,7 +143,15 @@ class Client:
     def stress_server(self):
         time_diff = 0
         for j in range(0, self.num_tasks):
-            args = [1] + [0] * int(self.plm_sig[j])
+            if self.task == "fft":
+                args = [1] + [0] * int(self.plm_sig[j])
+            elif self.task == "empty_loop" or self.task == "random_gen":
+                args = self.plm_sig[j]
+            elif self.task == "receive_array":
+                args = list(range(0, self.plm_sig[j]))
+            else:
+                print("Task {} is not available".format(self.task))
+                sys.exit()
             message = pickle.dumps({"task": self.task, "args": args})
             start = time.time()
             for i in range(0, self.num_conn):
@@ -484,9 +492,9 @@ client = Client(
 
 client.governors_compare()
 client.governors_compare_adaptive_param(
-   "sampling_rate",
-   sampling_rate_values,
-   default_sampling_rate,
+    "sampling_rate",
+    sampling_rate_values,
+    default_sampling_rate,
 )
 
 client.sweep_param(
