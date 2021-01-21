@@ -213,6 +213,7 @@ class Client:
         return {"energy": energy, "time": total_time}
 
     def time_energy_samples(self):
+        print("Getting time and energy samples")
         energy_list = []
         time_list = []
         for i in range(self.num_measurements):
@@ -231,6 +232,10 @@ class Client:
         )
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
+        if status == b"Success":
+            print("Scaling governor set to {}".format(governor))
+        else:
+            print("Failed to set scaling governor")
 
     def set_adaptive_param(self, param_name, value):
         control_message = pickle.dumps(
@@ -238,11 +243,19 @@ class Client:
         )
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
+        if status == b"Success":
+            print("{} set to {}".format(param_name, value))
+        else:
+            print("Failed to set {}".format(param_name))
 
     def set_uc(self, uc):
         control_message = pickle.dumps({"task": "set_uc", "args": uc})
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
+        if status == b"Success":
+            print("uc set to {}".format(uc))
+        else:
+            print("Failed to set uc")
 
     def set_sampling_rate(self, sampling_rate):
         control_message = pickle.dumps(
@@ -250,17 +263,20 @@ class Client:
         )
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
+        if status == b"Success":
+            print("Sampling rate set to {}".format(sampling_rate))
+        else:
+            print("Failed to set sampling rate")
 
     def set_governor(self, governor, uc):
-        print(governor)
-        print("uc = " + str(uc))
         self.set_scaling_governor(governor)
         if uc != "NA":
             self.set_uc(uc)
 
     def set_default_params(self, governor):
+        print("Setting default params")
         if governor == "adaptive" or governor == "ondemand":
-            self.set_sampling_rate(160000)
+            self.set_sampling_rate(default_sampling_rate)
         if governor == "adaptive":
             pass
             # self.set_adaptive_param('Sd', '1 0.5')
@@ -274,18 +290,16 @@ class Client:
         return ret
 
     def governors_compare(self):
-        print("Problem length modulation scale = " + str(self.plm_scale))
-        print("Number of tasks = " + str(self.num_tasks))
-        # Get modulation data for 'optimal' value of uc
+        print("Governors comparison test")
+        print("Get modulation data for 'optimal' value of uc")
         self.set_scaling_governor("adaptive")
         self.set_uc(60)
         self.set_default_params("adaptive")
         self.time_energy_measurement(True)
-        ## warmup ##
+        print("Warmup")
         self.set_scaling_governor("ondemand")
         self.time_energy_samples()
-        ## warmup ##
-
+        print("Get samples for each governor")
         gov_data = []
         for gov in passive_governors:
             gov_data.append(gov)
@@ -358,6 +372,12 @@ class Client:
     def governors_compare_adaptive_param(
         self, adaptive_param, adaptive_param_values, default_value
     ):
+
+        print(
+            "Governors comparison test for changing values of {}".format(
+                adaptive_param
+            )
+        )
         data_types = ["/plots/", "/data/"]
         for d_type in data_types:
             path = (
@@ -369,11 +389,11 @@ class Client:
             if not os.path.exists(path):
                 os.mkdir(path)
 
-        ## warmup ##
+        print("Warmup")
         self.set_scaling_governor("ondemand")
         self.time_energy_samples()
-        ## warmup ##
 
+        print("Get samples for each governor")
         gov_data = []
         for gov in passive_governors:
             gov_data.append(gov)
@@ -462,12 +482,12 @@ client = Client(
     square,
 )
 
-# client.governors_compare()
-# client.governors_compare_adaptive_param(
-#    "sampling_rate",
-#    sampling_rate_values,
-#    default_sampling_rate,
-# )
+client.governors_compare()
+client.governors_compare_adaptive_param(
+   "sampling_rate",
+   sampling_rate_values,
+   default_sampling_rate,
+)
 
 client.sweep_param(
     {"num_tasks": [4], "dm_freq": [2, 3], "plm_scale": [1, 2]},
