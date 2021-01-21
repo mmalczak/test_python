@@ -1,5 +1,6 @@
 import os
 from ast import literal_eval
+import apt
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -173,11 +174,18 @@ class Container:
                         plot_location + png_name.replace(".png", suffix)
                     )
                 if "animation" in args:
-                    anim = FuncAnimation(
-                        self.fig, self.animate, frames=self.l
-                    )
-                    writer = ImageMagickFileWriter(fps=1)
-                    anim.save(plot_location + gif_name, writer=writer)
+                    if apt.Cache()["imagemagick"].is_installed:
+                        anim = FuncAnimation(
+                            self.fig, self.animate, frames=self.l
+                        )
+                        print(plot_location + gif_name)
+                        writer = ImageMagickFileWriter(fps=1)
+                        anim.save(plot_location + gif_name, writer=writer)
+                    else:
+                        print(
+                            "imagemagick package necessary to produce "
+                            "animated figures"
+                        )
 
 
 cont = Container()
