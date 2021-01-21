@@ -445,7 +445,7 @@ dm_freq = 3
 plm_freq = 0
 dm_scale = 8 / 50
 plm_scale = 512
-num_measurements = 1
+num_measurements = 2
 sampling_rate = 10000
 increasing_freq = False
 square = False
@@ -462,7 +462,20 @@ client = Client(
     square,
 )
 
-# client.sweep_prob_l_and_num_tasks()
-client.time_energy_measurement(True)
-# client.sweep_param({'num_tasks':[32], 'dm_freq':[2, 3], 'plm_scale': [1, 2]}, None)
-# client.sweep_param({'num_tasks':[1, 2], 'dm_freq':[1, 2, 3]}, None)
+# client.governors_compare()
+# client.governors_compare_adaptive_param(
+#    "sampling_rate",
+#    sampling_rate_values,
+#    default_sampling_rate,
+# )
+
+client.sweep_param(
+    {"num_tasks": [4], "dm_freq": [2, 3], "plm_scale": [1, 2]},
+    [
+        {
+            "name": "sampling_rate",
+            "values": sampling_rate_values,
+            "default": default_sampling_rate,
+        }
+    ],
+)
