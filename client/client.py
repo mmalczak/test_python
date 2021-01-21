@@ -450,7 +450,7 @@ class Client:
         for param_value in param_values:
             setattr(self, param_name, param_value)
             if params:
-                self.sweep_param(params, adaptive_params)
+                self.sweep_param(params.copy(), adaptive_params)
             else:
                 self.governors_compare()
                 for adaptive_param in adaptive_params:
