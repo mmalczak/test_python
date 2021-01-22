@@ -1,12 +1,17 @@
+import logging
 import os
 from ast import literal_eval
-import apt
+from logging import error
+from logging import warning
 
+import apt
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
 from matplotlib.animation import ImageMagickFileWriter
+
+logging.basicConfig(level=logging.WARNING)
 
 project_location = os.path.realpath(os.getcwd() + "/../")
 adaptive_params_data_location = project_location + "/data/adaptive_params/"
@@ -64,7 +69,7 @@ class Container:
             self.l = len(self.data["adaptive_param_list"].loc[i])
             i = i + 1
         if self.l == 0:
-            print("Error")
+            error("Error")
 
         ## all adaptive params should be the same
         self.adaptive_param_list_common = self.data["adaptive_param_list"][
@@ -178,11 +183,10 @@ class Container:
                         anim = FuncAnimation(
                             self.fig, self.animate, frames=self.l
                         )
-                        print(plot_location + gif_name)
                         writer = ImageMagickFileWriter(fps=1)
                         anim.save(plot_location + gif_name, writer=writer)
                     else:
-                        print(
+                        warning(
                             "imagemagick package necessary to produce "
                             "animated figures"
                         )

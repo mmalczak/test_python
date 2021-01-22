@@ -1,5 +1,3 @@
-import statistics
-
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal as dsp
@@ -33,9 +31,6 @@ def plot_kernel_data(data, project_location, params_str):
     stop = 1
     for line in data.splitlines():
         line_split = line.split(";")
-        # if stop:
-        #    print(line_split)
-        #    stop = 0
         time.append(float(line_split[0]) + float(line_split[1]) / 1000000000)
         load.append(float(line_split[3]))
         load_est.append(float(line_split[4]))
@@ -49,9 +44,6 @@ def plot_kernel_data(data, project_location, params_str):
         D.append(get_array(line_split[12]))
         P.append(get_array(line_split[13]))
         phi_P_phi.append(get_array(line_split[14]))
-
-    print(statistics.mean(load))
-    print(statistics.mean(load_est))
 
     a = np.array([1])
     l = 1

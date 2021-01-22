@@ -1,14 +1,21 @@
+import logging
 import os
 import pickle
 import sys
 import time
+from logging import critical
+from logging import error
+from logging import info
 
 import numpy as np
 import pandas as pd
 import zmq
 
+logging.basicConfig(level=logging.INFO)
+
 # plm - problem length modulation
 # dm - delay modulation
+
 
 passive_governors = [
     {"governor": "performance", "uc": "NA", "color": "silver", "marker": "o"},
@@ -150,7 +157,7 @@ class Client:
             elif self.task == "receive_array":
                 args = list(range(0, self.plm_sig[j]))
             else:
-                print("Task {} is not available".format(self.task))
+                critical("Task {} is not available".format(self.task))
                 sys.exit()
             message = pickle.dumps({"task": self.task, "args": args})
             start = time.time()
@@ -221,11 +228,11 @@ class Client:
         return {"energy": energy, "time": total_time}
 
     def time_energy_samples(self):
-        print("Getting time and energy samples")
+        info("Getting time and energy samples")
         energy_list = []
         time_list = []
         for i in range(self.num_measurements):
-            print("sample idx = " + str(i))
+            info("sample idx = " + str(i))
             ret = self.time_energy_measurement(False)
             if ret == -1:
                 continue
@@ -241,9 +248,9 @@ class Client:
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
         if status == b"Success":
-            print("Scaling governor set to {}".format(governor))
+            info("Scaling governor set to {}".format(governor))
         else:
-            print("Failed to set scaling governor")
+            error("Failed to set scaling governor")
 
     def set_adaptive_param(self, param_name, value):
         control_message = pickle.dumps(
@@ -252,18 +259,18 @@ class Client:
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
         if status == b"Success":
-            print("{} set to {}".format(param_name, value))
+            info("{} set to {}".format(param_name, value))
         else:
-            print("Failed to set {}".format(param_name))
+            error("Failed to set {}".format(param_name))
 
     def set_uc(self, uc):
         control_message = pickle.dumps({"task": "set_uc", "args": uc})
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
         if status == b"Success":
-            print("uc set to {}".format(uc))
+            info("uc set to {}".format(uc))
         else:
-            print("Failed to set uc")
+            error("Failed to set uc")
 
     def set_sampling_rate(self, sampling_rate):
         control_message = pickle.dumps(
@@ -272,9 +279,9 @@ class Client:
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
         if status == b"Success":
-            print("Sampling rate set to {}".format(sampling_rate))
+            info("Sampling rate set to {}".format(sampling_rate))
         else:
-            print("Failed to set sampling rate")
+            error("Failed to set sampling rate")
 
     def set_governor(self, governor, uc):
         self.set_scaling_governor(governor)
@@ -282,7 +289,7 @@ class Client:
             self.set_uc(uc)
 
     def set_default_params(self, governor):
-        print("Setting default params")
+        info("Setting default params")
         if governor == "adaptive" or governor == "ondemand":
             self.set_sampling_rate(default_sampling_rate)
         if governor == "adaptive":
@@ -298,16 +305,16 @@ class Client:
         return ret
 
     def governors_compare(self):
-        print("Governors comparison test")
-        print("Get modulation data for 'optimal' value of uc")
+        info("Governors comparison test")
+        info("Get modulation data for 'optimal' value of uc")
         self.set_scaling_governor("adaptive")
         self.set_uc(60)
         self.set_default_params("adaptive")
         self.time_energy_measurement(True)
-        print("Warmup")
+        info("Warmup")
         self.set_scaling_governor("ondemand")
         self.time_energy_samples()
-        print("Get samples for each governor")
+        info("Get samples for each governor")
         gov_data = []
         for gov in passive_governors:
             gov_data.append(gov)
@@ -381,7 +388,7 @@ class Client:
         self, adaptive_param, adaptive_param_values, default_value
     ):
 
-        print(
+        info(
             "Governors comparison test for changing values of {}".format(
                 adaptive_param
             )
@@ -397,11 +404,11 @@ class Client:
             if not os.path.exists(path):
                 os.mkdir(path)
 
-        print("Warmup")
+        info("Warmup")
         self.set_scaling_governor("ondemand")
         self.time_energy_samples()
 
-        print("Get samples for each governor")
+        info("Get samples for each governor")
         gov_data = []
         for gov in passive_governors:
             gov_data.append(gov)
