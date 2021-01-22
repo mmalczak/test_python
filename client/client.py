@@ -38,13 +38,11 @@ adaptive_governors = [
     {"governor": "adaptive", "uc": 100, "color": "crimson", "marker": "x"},
 ]
 
-sampling_rate_values = [10000, 20000, 40000, 80000, 160000, 320000, 640000]
-default_sampling_rate = 10000
-
 
 class Client:
     def __init__(
         self,
+        ip,
         task,
         num_tasks,
         dm_freq,
@@ -54,6 +52,7 @@ class Client:
         num_measurements,
         increasing_freq,
         square,
+        default_sampling_rate,
     ):
         self.task = task
         self.num_tasks = num_tasks
@@ -64,6 +63,7 @@ class Client:
         self.num_measurements = num_measurements
         self.increasing_freq = increasing_freq
         self.square = square
+        self.default_sampling_rate = default_sampling_rate
 
         self.context = zmq.Context()
         self.num_conn = 8
@@ -72,11 +72,9 @@ class Client:
         for i in range(0, self.num_conn):
             port = 5550 + i
             self.sockets.append(self.context.socket(zmq.DEALER))
-            ip = sys.argv[1]
             self.sockets[i].connect("tcp://" + ip + ":" + str(port))
 
         self.control_socket = self.context.socket(zmq.DEALER)
-        ip = sys.argv[1]
         self.control_socket.connect("tcp://" + ip + ":" + str(5540))
 
         self.project_location = os.path.realpath(os.getcwd() + "/../")
@@ -291,7 +289,7 @@ class Client:
     def set_default_params(self, governor):
         info("Setting default params")
         if governor == "adaptive" or governor == "ondemand":
-            self.set_sampling_rate(default_sampling_rate)
+            self.set_sampling_rate(self.default_sampling_rate)
         if governor == "adaptive":
             pass
             # self.set_adaptive_param('Sd', '1 0.5')
@@ -466,51 +464,3 @@ class Client:
                         adaptive_param["values"],
                         adaptive_param["default"],
                     )
-
-
-# Available tasks with example arguments
-# "fft" [1]+[0]*31
-# "empty_loop" 500000
-# "random_gen" 10
-# "receive_array" [1, 2, 3, 4, 5]
-
-task = "fft"
-num_tasks = 128
-dm_freq = 3
-plm_freq = 0
-dm_scale = 8 / 50
-plm_scale = 512
-num_measurements = 2
-sampling_rate = 10000
-increasing_freq = False
-square = False
-
-client = Client(
-    task,
-    num_tasks,
-    dm_freq,
-    plm_freq,
-    dm_scale,
-    plm_scale,
-    num_measurements,
-    increasing_freq,
-    square,
-)
-
-client.governors_compare()
-client.governors_compare_adaptive_param(
-    "sampling_rate",
-    sampling_rate_values,
-    default_sampling_rate,
-)
-
-client.sweep_param(
-    {"num_tasks": [4], "dm_freq": [2, 3], "plm_scale": [1, 2]},
-    [
-        {
-            "name": "sampling_rate",
-            "values": sampling_rate_values,
-            "default": default_sampling_rate,
-        }
-    ],
-)
