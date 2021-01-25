@@ -16,6 +16,10 @@ logging.basicConfig(level=logging.WARNING)
 project_location = os.path.realpath(os.getcwd() + "/../")
 adaptive_params_data_location = project_location + "/data/adaptive_params/"
 adaptive_params_plots_location = project_location + "/plots/adaptive_params/"
+if not os.path.exists(project_location + "/plots/"):
+    os.mkdir(project_location + "/plots/")
+if not os.path.exists(adaptive_params_plots_location):
+    os.mkdir(adaptive_params_plots_location)
 
 
 def plot_common(decorated_function):
@@ -162,6 +166,8 @@ class Container:
             plot_location = (
                 adaptive_params_plots_location + adaptive_param + "/"
             )
+            if not os.path.exists(plot_location):
+                os.mkdir(plot_location)
             for csv_name in os.listdir(data_location):
                 png_name = csv_name.replace(".csv", ".png")
                 gif_name = csv_name.replace(".csv", ".gif")

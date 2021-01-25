@@ -9,6 +9,10 @@ from plot_kernel_data import plot_kernel_data
 project_location = os.path.realpath(os.getcwd() + "/../")
 data_location = project_location + "/data/mod_vs_tlm/"
 plot_location = project_location + "/plots/mod_vs_tlm/"
+if not os.path.exists(project_location + "/plots/"):
+    os.mkdir(project_location + "/plots/")
+if not os.path.exists(plot_location):
+    os.mkdir(plot_location)
 
 
 def plot_common(decorated_function):
