@@ -1,9 +1,5 @@
-import pickle
-import sys
 from subprocess import PIPE
 from subprocess import run
-
-import zmq
 
 
 class controller_class:
@@ -115,15 +111,3 @@ class controller_class:
         )
         tlm_data = out.stdout
         return tlm_data
-
-
-context = zmq.Context()
-socket = context.socket(zmq.ROUTER)
-port = 5540
-ip = sys.argv[1]
-socket.bind("tcp://" + ip + ":" + str(port))
-while True:
-    [identity, message] = socket.recv_multipart()
-    message = pickle.loads(message)
-    ret = getattr(controller_class(), message["task"])(message["args"])
-    socket.send_multipart([identity, ret])
