@@ -92,7 +92,7 @@ class controller_class:
 
     def reset_tlm(self, args):
         out = run(
-            ["sudo ../..//telemetry/./tlm"],
+            ["sudo ../../telemetry/./tlm"],
             shell=True,
             stdout=PIPE,
             stderr=PIPE,
