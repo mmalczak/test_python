@@ -80,6 +80,8 @@ class Client:
         self.project_location = os.path.realpath(os.getcwd() + "/../")
         self.create_folders()
 
+    #Ja bym to zrobila jako jeden fstring (bez tych konkatenacji)
+    #https://realpython.com/python-f-strings/#:~:text=As%20of%20Python%203.6%2C%20f,but%20they%20are%20also%20faster!
     def __str__(self):
         string = ""
         string = string + "task_{}".format(self.task)
@@ -97,6 +99,7 @@ class Client:
         data_types = ["/plots/", "/data/"]
         data_folders = ["mod_vs_tlm", "adaptive_params", "scatter"]
         for d_type in data_types:
+            #Nie czytelniej jako os.path.join?
             path = self.project_location + d_type
             if not os.path.exists(path):
                 os.mkdir(path)
@@ -146,6 +149,7 @@ class Client:
             data.to_csv(path, index=False)
 
     def stress_server(self):
+        #nie wykorzystana zmienna :)
         time_diff = 0
         for j in range(0, self.num_tasks):
             if self.task == "fft":
@@ -205,6 +209,7 @@ class Client:
         )
         self.control_socket.send(control_message)
         energy = self.control_socket.recv()
+        # To mozna w jednej linijce if float(energy)
         energy = float(energy)
         if energy < 0:
             return -1
@@ -218,6 +223,8 @@ class Client:
             data = data.decode("utf-8")
             path = self.project_location + "/data/mod_vs_tlm/"
             path = path + str(self) + ".txt"
+            #otwieranie pliku mozna robic z context managerem (with open...) wtedy nie trzeba pamietac o zamykaniu i jest
+            # bardziej pythonowo
             f = open(path, "w")
             f.write(data)
             f.close()
@@ -266,6 +273,8 @@ class Client:
         self.control_socket.send(control_message)
         status = self.control_socket.recv()
         if status == b"Success":
+            # z kolei w logowaniu uzywa sie formatowania %s
+            # https://stackoverflow.com/a/34634301
             info("uc set to {}".format(uc))
         else:
             error("Failed to set uc")
@@ -321,6 +330,7 @@ class Client:
             )
             gov_data[-1].update(temp)
         for gov in ondemand_governors:
+            #nie prosciej najpierw updatowac gov a potem zrobic append?
             gov_data.append(gov)
             temp = self.get_governor_time_energy_samples(
                 gov["governor"], gov["uc"]
